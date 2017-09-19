@@ -9,8 +9,14 @@
 		<a href="javascript:;" @click="getGoodsInfo(itemId)">获取商品数据</a>
 		<a href="javascript:;" @click="subOrder">绑定商品</a>
 		<a href="javascript:;" @click="getGoodsSku">获取商品SKU</a>
+		<a href="javascript:;" @click="testFun">测试啊</a>
 		<div class="goods">
-			
+			<h2>当前选择sku: {{this.sku}}</h2>
+			<ul>
+				<li v-for="item in goods.sku">
+					<a href="javascript:;" @click="selectSku(item.sku)">{{item.i_propName}}-{{item.i_name}} {{item.k_propName}}-{{item.k_name}}</a>
+				</li>
+			</ul>
 		</div>
 	</div>
 	
@@ -30,43 +36,23 @@
 				enPWD:"",
   				cookies:"",
   				LoginToken:{},
-  				goods:{},
-  				itemId:"556598911988",
+  				goods:{
+  					"sku":null
+  				},
+  				itemId:"554918477081",
   				sku:"3614573019782",
   				realPay:{}
 			}
 		},
 		methods:{
-			getSign(){
-				if(/_m_h5_tk=([\w]+)_[\d]+;/.test(this.cookies)){
-					var token = /_m_h5_tk=([\w]+)_[\d]+;/.exec(this.cookies)[1];
-					var time = new Date().getTime()
-					var sign = md5(token + "&" + time + "&" + "12574478" + "&" + '{"spm":"a2141.7756461.2.6","page":1,"tabCode":"all","appVersion":"1.0","appName":"tborder"}');
-					return {sign:sign, time:time}
-				}
-				return null;
+			testFun(){
+				this.hezone.handleSKU({"name":"sdsdsd","sku":13345614})
 			},
-			testSign(cb){
-				if(/_m_h5_tk=([\w]+)_[\d]+;/.test(this.cookies)){
-					var token = /_m_h5_tk=([\w]+)_[\d]+;/.exec(this.cookies)[1];
-					console.log(token)
-					var time = new Date().getTime()
-					// time = 1505720464361
-					// this.itemId = 556598911988
-					// this.sku = 3614573019782
-					superagent.post("http://tool.chinaz.com/tools/md5.aspx")
-						.send(`q=${token}%26${time}%2612574478%26%7B%22itemId%22%3A${this.itemId}%2C%22quantity%22%3A1%2C%22buyNow%22%3Atrue%2C%22skuId%22%3A${this.sku}%2C%22serviceId%22%3Anull%2C%22exParams%22%3A%22%7B%5C%22buyFrom%5C%22%3A%5C%22tmall_h5_detail%5C%22%7D%22%7D&ende=0&md5type=1`)
-						.end((error, result)=>{
-							var sign = /WrapHid"\sid="MD5Result">([\w]+)<\/tex/.exec(result.text)[1];
-							cb(null,{sign:sign,time:time})
-						})
-				}
-				
-				//7c56a3c23f6907caef9627eb50f6d722&1505719448782&12574478&{"itemId":556598911988,"quantity":1,"buyNow":true,"skuId":3614573019782,"serviceId":null,"exParams":"{\"buyFrom\":\"tmall_h5_detail\"}"}
+			selectSku(sku){
+				this.sku = sku
 			},
 			queryOrders(){
-
-				var sign = this.getSign();
+				var sign = this.hezone.deSign(this.cookies);
 				console.log(sign)
 				var url = "http://api.m.taobao.com/h5/mtop.order.queryboughtlist/3.0/?appKey=12574478&t=" + sign.time + "&sign="+ sign.sign +"&api=mtop.order.queryBoughtList&v=3.0&ttid=%23%23h5&ecode=1&AntiFlood=true&AntiCreep=true&LoginRequest=true&type=jsonp&dataType=jsonp&callback=mtopjsonp1&data=%7B%22spm%22%3A%22a2141.7756461.2.6%22%2C%22page%22%3A1%2C%22tabCode%22%3A%22all%22%2C%22appVersion%22%3A%221.0%22%2C%22appName%22%3A%22tborder%22%7D"
 				superagent.get(url)
@@ -79,23 +65,6 @@
 						console.log(result)
 					})		
 			},
-			hdndleCookie(cookie){
-				//JSESSIONID=EF6Y14PUO2-MYBO0ZFIQ15FGCOH2BKT1-DC66TO7J-IOIN; Path=/; HttpOnly
-				var tmp = ''
-				for(var i=0;i<cookie.length;i++){
-					//处理已经存在的旧cookie
-					var isTmp = cookie[i].split("=")[0]
-					if(tmp == ''){
-						tmp += cookie[i].split(";")[0]
-						this.cookies = this.cookies.replace(`/${isTmp}=(.*?);/`, cookie[i].split(";")[0])
-					}else{
-						tmp += `; ${cookie[i].split(";")[0]}`
-						this.cookies = this.cookies.replace(`/${isTmp}=(.*?);/`, `; ${cookie[i].split(";")[0]}`)
-					}
-				}
-				this.cookies += tmp;
-				console.log(this.cookies);
-			},
 			getLoginToken(){
 				//获取登录页面的各种token值
 				var url = "https://login.m.taobao.com/login.htm";
@@ -107,8 +76,7 @@
 					.end((error, result)=>{
 						if(result){
 							//记录访问的cookie
-
-							this.hdndleCookie(result.headers['set-cookie'])
+							this.cookies = this.hezone.hdndleCookie(this.cookies,result.headers['set-cookie'])
 							//正则获取登录所需token
 							this.getLoginTokenReg(result.text);
 							return;
@@ -146,7 +114,7 @@
 					.end((error, result)=>{
 						if(!error){
 							console.log(result)
-							//this.hdndleCookie(result.headers['set-cookie'])
+							//this.cookies = this.hezone.hdndleCookie(this.cookies,result.headers['set-cookie'])
 							//result.redirects.length >= 1 ? this.redirects(result.redirects) : console.log("无需跳转"+result.redirects)
 						}else{
 							console.log(error,result)
@@ -188,7 +156,8 @@
 			},
 			subOrder(){
 				//https://buy.m.tmall.com/order/confirmOrderWap.htm?enc=™&itemId=543106620083&exParams=%7B%7D&quantity=1&divisionCode=420111&userId=2848433382&buyNow=true 无sku
-				var url = `https://buy.m.tmall.com/order/confirmOrderWap.htm?enc=%3F&itemId=${this.itemId}&exParams=%7B%7D&skuId=3446274317764&quantity=1&userId=${this.goods.userId}&buyNow=true&_input_charset=utf-8&x-itemid=${this.itemId}`
+				var url = `https://buy.m.tmall.com/order/confirmOrderWap.htm?enc=%3F&itemId=${this.itemId}&exParams=%7B%7D&skuId=${this.sku}&quantity=1&userId=${this.goods.userId}&buyNow=true&_input_charset=utf-8&x-itemid=${this.itemId}`
+				url = `https://buy.m.tmall.com/order/confirmOrderWap.htm?enc=%E2%84%A2&buyNow=true&_input_charset=utf-8&itemId=${this.itemId}&quantity=1&divisionCode=420100&x-itemid=${this.itemId}`
 				superagent.get(url)
 					.set({
 						"user-agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1",
@@ -212,25 +181,26 @@
 						this.goods.nick = goods.data.seller.nick
 						if(goods.data.skuModel.skuProps){
 							this.goods.skuModel = goods.data.skuModel
-							for(var i in this.goods.skuModel.skuProps[0].values){
-								console.log(this.goods.skuModel.skuProps[0].values[i])
-							}
-							console.log(this.goods.skuModel)
+							this.goods.sku = this.hezone.handleSKU(this.goods.skuModel);
+							console.log(this.goods.sku)
+						}else{
+							this.goods.sku = 0
+							console.log(goods.data)
 						}
 					})
 			},
-			getGoodsSku(){
-
+			getGoodsSku(skuModel){
+				console.log(this.goods)
 			},
 			Buildorder(){
-				this.testSign((error, res)=>{
+				this.hezone.getSign(this.cookies,this.itemId,this.sku,(error, res)=>{
 					var url = `https://h5acs.m.tmall.com/h5/mtop.trade.buildorder.h5/3.0/?appKey=12574478&t=${res.time}&sign=${res.sign}&api=mtop.trade.buildOrder.h5&v=3.0&type=originaljson&timeout=20000&isSec=1&dataType=json&ecode=1&ttid=%23b%23ip%23%23_h5&AntiFlood=true&LoginRequest=true&H5Request=true&x-itemid=${this.itemId}&x-uid=${this.goods['x-uid']}`
 					superagent.post(url)
 						.set("content-type","application/x-www-form-urlencoded")
 						.set("user-agent","Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1")
-						.set("referer","https://buy.m.tmall.com/order/confirmOrderWap.htm?enc=%E2%84%A2&itemId=556598911988&exParams=%7B%7D&skuId=3614573019782&quantity=1&divisionCode=420111&userId=2848433382&buyNow=true&_input_charset=utf-8&x-itemid=556598911988")
+						.set("referer",`https://buy.m.tmall.com/order/confirmOrderWap.htm?enc=%E2%84%A2&itemId=${this.itemId}&exParams=%7B%7D&skuId=${this.sku}&quantity=1&divisionCode=420111&userId=${this.goods.userId}&buyNow=true&_input_charset=utf-8&x-itemid=${this.itemId}`)
 						.set("cookie",this.cookies)
-						.send(`data=%7B%22itemId%22%3A${this.itemId}%2C%22quantity%22%3A1%2C%22buyNow%22%3Atrue%2C%22skuId%22%3A3614573019782%2C%22serviceId%22%3Anull%2C%22exParams%22%3A%22%7B%5C%22buyFrom%5C%22%3A%5C%22tmall_h5_detail%5C%22%7D%22%7D`)
+						.send(`data=%7B%22itemId%22%3A${this.itemId}%2C%22quantity%22%3A1%2C%22buyNow%22%3Atrue%2C%22skuId%22%3A${this.sku}%2C%22serviceId%22%3Anull%2C%22exParams%22%3A%22%7B%5C%22buyFrom%5C%22%3A%5C%22tmall_h5_detail%5C%22%7D%22%7D`)
 						.end((error, result)=>{
 							if(result.headers['set-cookie']){
 								this.cookies = this.cookies.replace(/_m_h5_tk=[\w_?]+;/,"")
@@ -241,14 +211,64 @@
 								this.Buildorder();
 							}else{
 								this.realPay = JSON.parse(result.text)
-								console.log(this.realPay)
+								console.log(JSON.parse(result.text))
 							}
 						})
 				})
 			},
 			fukuan(){
 				var url = `https://h5acs.m.tmall.com/h5/mtop.trade.createorder.h5/3.0/?appKey=12574478&t=1505726256443&sign=f8bb65f2946b5d701e797d8627629181&api=mtop.trade.createOrder.h5&v=3.0&type=originaljson&timeout=20000&dataType=json&isSec=1&ecode=1&ttid=%23b%23ip%23%23_h5&AntiFlood=true&LoginRequest=true&H5Request=true&submitref=0a67f6&x-itemid=539758639266&x-uid=2848433382`
-				//var data = `{"params":"{\"hierarchy\":\"{\\\"structure\\\":{\\\"item_3db4a98d538c5a1a94cfc128035ade15\\\":[\\\"itemInfo_3db4a98d538c5a1a94cfc128035ade15\\\",\\\"quantity_3db4a98d538c5a1a94cfc128035ade15\\\",\\\"promotion_3db4a98d538c5a1a94cfc128035ade15\\\",\\\"itemPay_3db4a98d538c5a1a94cfc128035ade15\\\"],\\\"order_99319677a9ff930e59bbdf1330c4e10d\\\":[\\\"orderInfo_99319677a9ff930e59bbdf1330c4e10d\\\",\\\"item_3db4a98d538c5a1a94cfc128035ade15\\\",\\\"deliveryMethod_99319677a9ff930e59bbdf1330c4e10d\\\",\\\"service_yfx_99319677a9ff930e59bbdf1330c4e10d@1\\\",\\\"service_yfx_99319677a9ff930e59bbdf1330c4e10d@2\\\",\\\"memo_99319677a9ff930e59bbdf1330c4e10d\\\",\\\"orderPay_99319677a9ff930e59bbdf1330c4e10d\\\"],\\\"confirmOrder_1\\\":[\\\"address_1\\\",\\\"order_99319677a9ff930e59bbdf1330c4e10d\\\",\\\"installmentToggle_1\\\",\\\"installmentPicker_1\\\",\\\"agencyPay_1\\\",\\\"anonymous_1\\\",\\\"realPay_1\\\",\\\"submitOrder_1\\\",\\\"ncCheckCode_ncCheckCode1\\\"]}}\",\"data\":\"{\\\"installmentToggle_1\\\":{\\\"submit\\\":true,\\\"id\\\":\\\"1\\\",\\\"tag\\\":\\\"installmentToggle\\\",\\\"type\\\":\\\"biz\\\",\\\"fields\\\":{\\\"checked\\\":\\\"false\\\",\\\"title\\\":\\\"花呗分期\\\",\\\"checkedLastStatus\\\":\\\"false\\\"},\\\"_request\\\":true},\\\"installmentPicker_1\\\":{\\\"ref\\\":\\\"${ref}\\\",\\\"submit\\\":true,\\\"id\\\":\\\"1\\\",\\\"tag\\\":\\\"installmentPicker\\\",\\\"type\\\":\\\"biz\\\",\\\"fields\\\":{\\\"poundageTitle\\\":\\\"手续费\\\",\\\"pageTitle\\\":\\\"花呗分期详情\\\",\\\"systemTimes\\\":\\\"${systemTimes}\\\",\\\"desc\\\":\\\"修改分期\\\"},\\\"status\\\":\\\"hidden\\\",\\\"_request\\\":true},\\\"deliveryMethod_99319677a9ff930e59bbdf1330c4e10d\\\":{\\\"ref\\\":\\\"4188366\\\",\\\"submit\\\":true,\\\"hidden\\\":{\\\"empty\\\":false,\\\"extensionMap\\\":{\\\"deliveryId\\\":\\\"99319677a9ff930e59bbdf1330c4e10d\\\"},\\\"notEmpty\\\":true},\\\"id\\\":\\\"99319677a9ff930e59bbdf1330c4e10d\\\",\\\"tag\\\":\\\"deliveryMethod\\\",\\\"type\\\":\\\"biz\\\",\\\"fields\\\":{\\\"secondOption\\\":false,\\\"selectedId\\\":\\\"2\\\",\\\"options\\\":[{\\\"extra\\\":\\\"\\\",\\\"fare\\\":\\\"0.00\\\",\\\"fareCent\\\":0,\\\"hasOption\\\":false,\\\"id\\\":\\\"2\\\",\\\"message\\\":\\\"快递 免邮\\\",\\\"serviceType\\\":\\\"-4\\\",\\\"signText\\\":\\\"\\\"}],\\\"checked\\\":true,\\\"title\\\":\\\"配送方式\\\"},\\\"_request\\\":true},\\\"service_yfx_99319677a9ff930e59bbdf1330c4e10d@1\\\":{\\\"ref\\\":\\\"0bc7312\\\",\\\"submit\\\":true,\\\"hidden\\\":{\\\"empty\\\":false,\\\"extensionMap\\\":{\\\"serviceType\\\":\\\"1\\\",\\\"outId\\\":\\\"99319677a9ff930e59bbdf1330c4e10d\\\",\\\"id\\\":\\\"yfx_99319677a9ff930e59bbdf1330c4e10d\\\"},\\\"notEmpty\\\":true},\\\"bizName\\\":\\\"ServiceMultiSelect\\\",\\\"id\\\":\\\"yfx_99319677a9ff930e59bbdf1330c4e10d@1\\\",\\\"tag\\\":\\\"service\\\",\\\"type\\\":\\\"multiSelect\\\",\\\"fields\\\":{\\\"selectedIds\\\":[],\\\"groups\\\":[{\\\"options\\\":[{\\\"name\\\":\\\"确认收货前退货可赔付10元 1.10元\\\",\\\"optionId\\\":\\\"{'bizType':1,'optionId':'checkBoxOptionId','serviceId':'1064','storeId':0}\\\",\\\"value\\\":\\\"1.10\\\"}],\\\"required\\\":false}],\\\"title\\\":\\\"运费险\\\"},\\\"btn\\\":\\\"multiSelect\\\",\\\"_request\\\":true},\\\"ncCheckCode_ncCheckCode1\\\":{\\\"ref\\\":\\\"cbf3cf8\\\",\\\"submit\\\":true,\\\"id\\\":\\\"ncCheckCode1\\\",\\\"tag\\\":\\\"ncCheckCode\\\",\\\"type\\\":\\\"biz\\\",\\\"fields\\\":{\\\"nc\\\":\\\"1\\\",\\\"token\\\":\\\"${token}\\\"}},\\\"submitOrder_1\\\":{\\\"submit\\\":true,\\\"id\\\":\\\"1\\\",\\\"tag\\\":\\\"submitOrder\\\",\\\"type\\\":\\\"biz\\\",\\\"fields\\\":{\\\"submitTitle\\\":\\\"提交订单\\\",\\\"tmallPointStatus\\\":\\\"0\\\",\\\"isTmallHKPresellSelf\\\":false,\\\"submitOrderType\\\":\\\"UNITY\\\",\\\"isTmallHKPresellOrder\\\":false},\\\"status\\\":\\\"normal\\\",\\\"_realPay\\\":{\\\"id\\\":\\\"1\\\",\\\"tag\\\":\\\"realPay\\\",\\\"type\\\":\\\"biz\\\",\\\"fields\\\":{\\\"quantity\\\":1,\\\"price\\\":\\\"${price}\\\",\\\"weight\\\":0,\\\"mallTotalPrice\\\":${mallTotalPrice},\\\"originPrice\\\":\\\"${originPrice}\\\",\\\"microPurchaseTotalPrice\\\":0,\\\"tmallHkTotalPrice\\\":0,\\\"currencySymbol\\\":\\\"￥\\\"}},\\\"_address\\\":{\\\"ref\\\":\\\"c67d863\\\",\\\"id\\\":\\\"1\\\",\\\"tag\\\":\\\"address\\\",\\\"type\\\":\\\"biz\\\",\\\"fields\\\":{\\\"tempAddress\\\":false,\\\"useMDZT\\\":false,\\\"h5SupportIframe\\\":true,\\\"useStation\\\":false,\\\"selectedId\\\":${selectedId},\\\"mdSellerId\\\":\\\"${mdSellerId}\\\",\\\"agencyReceive\\\":1,\\\"agencyReceiveH5Url\\\":\\\"${agencyReceiveH5Url}\\\",\\\"options\\\":[{\\\"addressDetail\\\":\\\"${addressDetail}\\\",\\\"agencyReceiveDesc\\\":\\\"收货不便时,可选择免费代收货服务\\\",\\\"areaName\\\":\\\"${areaName}\\\",\\\"cityName\\\":\\\"${cityName}\\\",\\\"countryName\\\":\\\"\\\",\\\"defaultAddress\\\":true,\\\"deliveryAddressId\\\":${selectedId},\\\"divisionCode\\\":\\\"420111\\\",\\\"enableMDZT\\\":false,\\\"enableStation\\\":false,\\\"enforceUpdate4Address\\\":true,\\\"fullName\\\":\\\"${fullName}\\\",\\\"lgShopId\\\":0,\\\"mobile\\\":\\\"${mobile}\\\",\\\"needUpdate4Address\\\":false,\\\"postCode\\\":\\\"${postCode}\\\",\\\"provinceName\\\":\\\"${provinceName}\\\",\\\"stationId\\\":0,\\\"storeAddress\\\":true,\\\"townDivisionId\\\":${townDivisionId},\\\"townName\\\":\\\"${townName}\\\",\\\"updateAddressTip\\\":\\\"\\\"}],\\\"linkAddressId\\\":0,\\\"supportFwd\\\":false,\\\"info\\\":{\\\"value\\\":\\\"${selectedId}\\\"},\\\"url\\\":\\\"//buy.m.tmall.com/order/addressList.htm?enableStation=true&requestStationUrl=%2F%2Fstationpicker-i56.m.taobao.com%2Finland%2FshowStationInPhone.htm&_input_charset=utf8&hidetoolbar=true&bridgeMessage=true\\\",\\\"title\\\":\\\"管理收货地址\\\"},\\\"_request\\\":true}},\\\"anonymous_1\\\":{\\\"submit\\\":true,\\\"id\\\":\\\"1\\\",\\\"tag\\\":\\\"anonymous\\\",\\\"type\\\":\\\"toggle\\\",\\\"fields\\\":{\\\"name\\\":\\\"匿名购买\\\",\\\"checked\\\":true},\\\"btn\\\":\\\"toggle\\\"},\\\"agencyPay_1\\\":{\\\"submit\\\":true,\\\"id\\\":\\\"1\\\",\\\"tag\\\":\\\"agencyPay\\\",\\\"type\\\":\\\"toggle\\\",\\\"fields\\\":{\\\"name\\\":\\\"朋友代付(不支持运费险)\\\",\\\"checked\\\":false},\\\"btn\\\":\\\"toggle\\\",\\\"_request\\\":true},\\\"promotion_3db4a98d538c5a1a94cfc128035ade15\\\":{\\\"submit\\\":true,\\\"hidden\\\":{\\\"empty\\\":false,\\\"extensionMap\\\":{\\\"promotionType\\\":\\\"item\\\",\\\"outId\\\":\\\"3db4a98d538c5a1a94cfc128035ade15\\\",\\\"orderOutId\\\":\\\"3db4a98d538c5a1a94cfc128035ade15\\\"},\\\"notEmpty\\\":true},\\\"id\\\":\\\"3db4a98d538c5a1a94cfc128035ade15\\\",\\\"tag\\\":\\\"promotion\\\",\\\"type\\\":\\\"select\\\",\\\"fields\\\":{\\\"selectedId\\\":\\\"${selectedId}\\\",\\\"options\\\":[{\\\"name\\\":\\\"已省469元:顺丰包邮\\\",\\\"optionId\\\":\\\"Tmall$tmallItemPromotion-1512164067_12920490348#8908296133\\\"},{\\\"name\\\":\\\"已省469元:热卖促销\\\",\\\"optionId\\\":\\\"Tmall$commonItemPromotion-3629570031_19954630232\\\"}],\\\"disabled\\\":false,\\\"title\\\":\\\"商品优惠\\\"},\\\"btn\\\":\\\"select\\\",\\\"status\\\":\\\"hidden\\\",\\\"_request\\\":true},\\\"memo_99319677a9ff930e59bbdf1330c4e10d\\\":{\\\"ref\\\":\\\"1f528f8\\\",\\\"submit\\\":true,\\\"bizName\\\":\\\"memo\\\",\\\"id\\\":\\\"99319677a9ff930e59bbdf1330c4e10d\\\",\\\"tag\\\":\\\"memo\\\",\\\"type\\\":\\\"input\\\",\\\"fields\\\":{\\\"name\\\":\\\"给卖家留言：\\\",\\\"placeholder\\\":\\\"选填:对本次交易的说明(建议填写已和卖家协商一致的内容)\\\",\\\"title\\\":\\\"买家留言：\\\",\\\"value\\\":\\\"\\\"},\\\"btn\\\":\\\"input\\\"}}\",\"linkage\":\"{\\\"common\\\":{\\\"compress\\\":true,\\\"submitParams\\\":\\\"${submitParams}\\\",\\\"validateParams\\\":\\\"${validateParams}\\\"},\\\"signature\\\":\\\"${signature}\\\"}\"}","ua":"098#E1hv9QvWvI6vUvCkvvvvvjiPP25wAjlWR2Fv0jthPmPy0j1nPsFy6jtWRFLpQjnHRphvCvvvphmnvpvBvUvAWCwvvvvvvhCvvvmv0S9PvpvhPBsumpyCvhAvdv+bjNoXeB97EcqhQ8TJ+ulz8dknnbvtIoYbDpZTHb8rwZCliC4AdX3z8SoxdX9Od5tvD70O58g7EcqhA8TJ+ul1pccQjd8rejpiuphvmvvvpBYoHZY+kphvCOOvpZ2yKphv8vvvphvvvvvvvvCCzQvvvcvvvhjNvvvCwvvvpaGvvvHQvvCCzQvvvcv3vpV1kj8ER9URMUsqQ44EMvM1z/cbMX2qCKL8TgLyAQyWqU5TlJuHmv23y/7u/tMM2n///nf3DpNXqOPdluAJsY/T5quP+O7MsbzGKis9DPGjQ47l9bu26w/Q3dKmKgzpQR0x0b5qe9wnrXmTFqqGSGAYk+su/ihPg/sBKguQkwdWSOuMFqe8sW2tFRejMXpRhq7hd+d9D9WngOqeiJ4mMYJGFdkEKU5v2MKJ/dPr6WsoSUoGFquE6+AKsP0h1T9BlMARMXkSGvWU/UzGI/um/Qsq5SsCMU9v1qm7Gnz9DPGjgO7l9bu26w/Q3dKmKgzpQP2aMXLr6WsoSUoGFquE6+s9DPAW/+2EAJAEMEz9FW9jirbD3R7EAPz5kuNRMX9jARmZtadTk9NcKE4gDdecA+233f7vKIPBsqmVKg8qFa2vTOSGeNuRlGA/ePuZrnfY/qSJKYMSzajbqU0TFqSJ6GzdkJdNTU5nMb0WKO5SAp62qnVgzJFXAYPKFbSO+OFpM/zOKUkT0PsPTaK1kJubMMzdz8qagiNFMd7VKOmQ9WsPSgkgkbuUQPqrFKVogUGUl/uNGphCvvOv9hCvvvvtvpvhvvCvp8wCvvpvvhHh3QhvCvvCphv="}`
+				var confirmOrder = this.realPay.data.hierarchy.root;
+				var orderID = this.realPay.data.hierarchy.structure[confirmOrder][1].split("_")[1];
+				var itemID = this.realPay.data.data[confirmOrder].fields.joinId;
+				var selectedId = this.realPay.data.data["promotion_"+itemID].fields.options[0].optionId
+				var selected_name = this.realPay.data.data["promotion_"+itemID].fields.options[0].name
+				var title = this.realPay.data.data["promotion_"+itemID].fields.title
+				var deliveryMethod = this.realPay.data.data["deliveryMethod_" + orderID]
+				var ncCheckCode_ncCheckCode1 = this.realPay.data.data.ncCheckCode_ncCheckCode1
+				var submitOrder_1 = this.realPay.data.data.submitOrder_1
+				var realPay = this.realPay.data.data.realPay_1
+				var address = this.realPay.data.data.address_1
+				var anonymous = this.realPay.data.data.anonymous_1
+				var agencyPay = this.realPay.data.data.agencyPay_1
+				var service_bwy = this.realPay.data.data["service_bwy_" + itemID]
+				var service_yfx = this.realPay.data.data["service_yfx_" + orderID]
+				//0ca8806ed63ceb64e8e53883c8a697f1
+				var order_ = "order_" + orderID;
+				var orderInfo_ = this.realPay.data.hierarchy.structure[order_][0];
+				var deliveryMethod_ =  "deliveryMethod_" + orderID;
+				var service_yfx_ =  "service_yfx_" + orderID;
+				var memo_ =  "memo_" + orderID;
+				var memo_ =  "memo_" + orderID;
+
+				//fcbc3d5fd49c3fdd0f5c0cf02741cab3
+				var item_ = "item_" + itemID;
+				var itemInfo_ = "itemInfo_" + itemID;
+				var quantity_ = "quantity_" + itemID;
+				var promotion_ = "promotion_" + itemID;
+				var itemPay_ = "itemPay_" + itemID;
+				var service_gybb_ = "service_gybb_" + itemID;
+				var service_bwy_ = "service_bwy_" + itemID;
+
+				//收货地址
+				var addressDetail = address.fields.options[0].addressDetail // 珞喻路618号 东方怡景大厦B座1301
+				var areaName = address.fields.options[0].areaName // 洪山区
+				var cityName = address.fields.options[0].cityName //武汉市
+				var deliveryAddressId = address.fields.options[0].deliveryAddressId
+				var divisionCode = address.fields.options[0].divisionCode
+				var fullName = address.fields.options[0].fullName
+				var mobile = address.fields.options[0].mobile
+				var postCode = address.fields.options[0].postCode
+				var provinceName = address.fields.options[0].provinceName
+				var townDivisionId = address.fields.options[0].townDivisionId
+				var townName = address.fields.options[0].townName
+				var tbGold_1 = this.realPay.data.data.tbGold_1
+
+				var linkage = this.realPay.data.data.linkage.common
+				var signature = this.realPay.data.data.linkage.signature
+
+				//${this.realPay.data.hierarchy.structure[this.realPay.data.hierarchy.root][1]}
+				var data = `{"params":"{\"hierarchy\":\"{\\\"structure\\\":{\\\"${confirmOrder}\\\":[\\\"address_1\\\",\\\"${order_}\\\",\\\"tbGold_1\\\",\\\"agencyPay_1\\\",\\\"anonymous_1\\\",\\\"realPay_1\\\",\\\"submitOrder_1\\\",\\\"ncCheckCode_ncCheckCode1\\\"],\\\"${order_}\\\":[\\\"${orderInfo_}\\\",\\\"${item_}\\\",\\\"${deliveryMethod_}\\\",\\\"${service_yfx_}@1\\\",\\\"${service_yfx_}@2\\\",\\\"${memo_}\\\",\\\"${order_}\\\"],\\\"${item_}\\\":[\\\"${itemInfo_}\\\",\\\"${quantity_}\\\",\\\"${promotion_}\\\",\\\"${itemPay_}\\\",\\\"${service_gybb_}@1\\\",\\\"${service_bwy_}@1\\\"]}}\",\"data\":\"{\\\"${promotion_}\\\":{\\\"submit\\\":${tbGold_1.hidden.empty},\\\"hidden\\\":{\\\"empty\\\":${tbGold_1.hidden.empty},\\\"extensionMap\\\":{\\\"promotionType\\\":\\\"item\\\",\\\"outId\\\":\\\"${itemID}\\\",\\\"orderOutId\\\":\\\"${itemID}\\\"},\\\"notEmpty\\\":${tbGold_1.hidden.notEmpty}},\\\"id\\\":\\\"${itemID}\\\",\\\"tag\\\":\\\"promotion\\\",\\\"type\\\":\\\"select\\\",\\\"fields\\\":{\\\"selectedId\\\":\\\"${selectedId}\\\",\\\"options\\\":[{\\\"name\\\":\\\"${selected_name}\\\",\\\"optionId\\\":\\\"${selectedId}\\\"}],\\\"disabled\\\":false,\\\"title\\\":\\\"${title}\\\"},\\\"btn\\\":\\\"select\\\",\\\"status\\\":\\\"hidden\\\",\\\"_request\\\":true},\\\"tbGold_1\\\":{\\\"submit\\\":${tbGold_1.hidden.empty},\\\"hidden\\\":{\\\"empty\\\":${tbGold_1.hidden.empty},\\\"extensionMap\\\":{\\\"sellerAvailablePoint\\\":\\\"${tbGold_1.hidden.extensionMap.sellerAvailablePoint}\\\",\\\"totalPoint\\\":\\\"${tbGold_1.hidden.extensionMap.totalPoint}\\\",\\\"usePoint\\\":\\\"${tbGold_1.hidden.extensionMap.usePoint}\\\",\\\"rate\\\":\\\"${tbGold_1.hidden.extensionMap.rate}\\\",\\\"availablePoint\\\":\\\"${tbGold_1.hidden.extensionMap.availablePoint}\\\"},\\\"notEmpty\\\":${tbGold_1.hidden.notEmpty}},\\\"id\\\":\\\"${tbGold_1.id}\\\",\\\"tag\\\":\\\"${tbGold_1.tag}\\\",\\\"type\\\":\\\"${tbGold_1.type}\\\",\\\"fields\\\":{\\\"name\\\":\\\"${tbGold_1.fields.name}\\\",\\\"checked\\\":${tbGold_1.fields.checked},\\\"value\\\":\\\"${tbGold_1.fields.value}\\\"},\\\"btn\\\":\\\"toggle\\\",\\\"_request\\\":true},\\\"${service_gybb_}@1\\\":{\\\"ref\\\":\\\"${this.realPay.data.data[service_bwy_+"@1"].ref}\\\",\\\"submit\\\":${tbGold_1.hidden.empty},\\\"hidden\\\":{\\\"empty\\\":${tbGold_1.hidden.empty},\\\"extensionMap\\\":{\\\"serviceType\\\":\\\"${this.realPay.data.data[service_bwy_+"@1"].hidden.extensionMap.serviceType}\\\",\\\"outId\\\":\\\"${itemID}\\\",\\\"id\\\":\\\"${service_bwy_}\\\"},\\\"notEmpty\\\":${tbGold_1.hidden.notEmpty}},\\\"bizName\\\":\\\"ServiceMultiSelect\\\",\\\"id\\\":\\\"${this.realPay.data.data[service_bwy_+"@1"].id}\\\",\\\"tag\\\":\\\"${this.realPay.data.data[service_bwy_+"@1"].tag}\\\",\\\"type\\\":\\\"${this.realPay.data.data[service_bwy_+"@1"].type}\\\",\\\"fields\\\":{\\\"selectedIds\\\":[\\\"${this.realPay.data.data[service_bwy_+"@1"].fields.groups[0].options[0].optionId}\\\"],\\\"groups\\\":[{\\\"options\\\":[{\\\"name\\\":\\\"${this.realPay.data.data[service_bwy_+"@1"].fields.groups[0].options[0].name}\\\",\\\"optionId\\\":\\\"${this.realPay.data.data[service_bwy_+"@1"].fields.groups[0].options[0].optionId}\\\",\\\"value\\\":\\\"${this.realPay.data.data[service_bwy_+"@1"].fields.groups[0].options[0].value}\\\"}],\\\"required\\\":${this.realPay.data.data[service_bwy_+"@1"].fields.groups[0].required}}],\\\"title\\\":\\\"${this.realPay.data.data[service_bwy_+"@1"].fields.title}\\\"},\\\"btn\\\":\\\"multiSelect\\\",\\\"_request\\\":true},\\\"${deliveryMethod_}\\\":{\\\"ref\\\":\\\"${deliveryMethod.ref}\\\",\\\"submit\\\":${deliveryMethod.submit},\\\"hidden\\\":{\\\"empty\\\":${deliveryMethod.hidden.empty},\\\"extensionMap\\\":{\\\"deliveryId\\\":\\\"${orderID}\\\"},\\\"notEmpty\\\":${deliveryMethod.hidden.notEmpty}},\\\"id\\\":\\\"${orderID}\\\",\\\"tag\\\":\\\"${deliveryMethod.tag}\\\",\\\"type\\\":\\\"${deliveryMethod.type}\\\",\\\"fields\\\":{\\\"secondOption\\\":${deliveryMethod.fields.secondOption},\\\"selectedId\\\":\\\"${deliveryMethod.fields.selectedId}\\\",\\\"options\\\":[{\\\"extra\\\":\\\"\\\",\\\"fare\\\":\\\"${deliveryMethod.fields.options[0].fare}\\\",\\\"fareCent\\\":${deliveryMethod.fields.options[0].fareCent},\\\"hasOption\\\":${deliveryMethod.fields.options[0].hasOption},\\\"id\\\":\\\"${deliveryMethod.fields.options[0].id}\\\",\\\"message\\\":\\\"${deliveryMethod.fields.options[0].message}\\\",\\\"serviceType\\\":\\\"${deliveryMethod.fields.options[0].serviceType}\\\",\\\"signText\\\":\\\"\\\"}],\\\"title\\\":\\\"${deliveryMethod.fields.title}\\\"},\\\"_request\\\":true},\\\"ncCheckCode_ncCheckCode1\\\":{\\\"ref\\\":\\\"${ncCheckCode_ncCheckCode1.ref}\\\",\\\"submit\\\":${ncCheckCode_ncCheckCode1.submit},\\\"id\\\":\\\"${ncCheckCode_ncCheckCode1.id}\\\",\\\"tag\\\":\\\"${ncCheckCode_ncCheckCode1.tag}\\\",\\\"type\\\":\\\"${ncCheckCode_ncCheckCode1.type}\\\",\\\"fields\\\":{\\\"nc\\\":\\\"${ncCheckCode_ncCheckCode1.fields.nc}\\\",\\\"token\\\":\\\"${ncCheckCode_ncCheckCode1.fields.token}\\\"}},\\\"submitOrder_1\\\":{\\\"submit\\\":${submitOrder_1.submit},\\\"id\\\":\\\"${submitOrder_1.id}\\\",\\\"tag\\\":\\\"${submitOrder_1.tag}\\\",\\\"type\\\":\\\"${submitOrder_1.type}\\\",\\\"fields\\\":{\\\"submitTitle\\\":\\\"${submitOrder_1.fields.submitTitle}\\\",\\\"isTmallHKPresellSelf\\\":${submitOrder_1.fields.isTmallHKPresellSelf},\\\"isTmallHKPresellOrder\\\":${submitOrder_1.fields.isTmallHKPresellOrder}},\\\"status\\\":\\\"${submitOrder_1.status}\\\",\\\"_realPay\\\":{\\\"id\\\":\\\"${realPay.id}\\\",\\\"tag\\\":\\\"${realPay.tag}\\\",\\\"type\\\":\\\"${realPay.type}\\\",\\\"fields\\\":{\\\"quantity\\\":${realPay.fields.quantity},\\\"price\\\":\\\"${realPay.fields.price}\\\",\\\"mallTotalPrice\\\":${realPay.fields.mallTotalPrice},\\\"originPrice\\\":\\\"${realPay.fields.originPrice}\\\",\\\"microPurchaseTotalPrice\\\":${realPay.fields.microPurchaseTotalPrice},\\\"tmallHkTotalPrice\\\":${realPay.fields.tmallHkTotalPrice},\\\"currencySymbol\\\":\\\"￥\\\"}},\\\"_address\\\":{\\\"ref\\\":\\\"${address.ref}\\\",\\\"id\\\":\\\"${address.id}\\\",\\\"tag\\\":\\\"${address.tag}\\\",\\\"type\\\":\\\"${address.type}\\\",\\\"fields\\\":{\\\"tempAddress\\\":${address.fields.tempAddress},\\\"useMDZT\\\":${address.fields.useMDZT},\\\"h5SupportIframe\\\":${address.fields.h5SupportIframe},\\\"useStation\\\":${address.fields.useStation},\\\"selectedId\\\":${address.fields.selectedId},\\\"mdSellerId\\\":\\\"${address.fields.mdSellerId}\\\",\\\"agencyReceive\\\":${address.fields.agencyReceive},\\\"agencyReceiveH5Url\\\":\\\"${address.fields.agencyReceiveH5Url}\\\",\\\"options\\\":[{\\\"addressDetail\\\":\\\"${addressDetail}\\\",\\\"agencyReceiveDesc\\\":\\\"${address.fields.options[0].agencyReceiveDesc}\\\",\\\"areaName\\\":\\\"${areaName}\\\",\\\"cityName\\\":\\\"${cityName}\\\",\\\"countryName\\\":\\\"\\\",\\\"defaultAddress\\\":true,\\\"deliveryAddressId\\\":${deliveryAddressId},\\\"divisionCode\\\":\\\"${divisionCode}\\\",\\\"enableMDZT\\\":false,\\\"enableStation\\\":false,\\\"enforceUpdate4Address\\\":true,\\\"fullName\\\":\\\"${fullName}\\\",\\\"lgShopId\\\":0,\\\"mobile\\\":\\\"${mobile}\\\",\\\"needUpdate4Address\\\":false,\\\"postCode\\\":\\\"${postCode}\\\",\\\"provinceName\\\":\\\"${provinceName}\\\",\\\"stationId\\\":0,\\\"storeAddress\\\":true,\\\"townDivisionId\\\":${townDivisionId},\\\"townName\\\":\\\"${townName}\\\",\\\"updateAddressTip\\\":\\\"\\\"}],\\\"linkAddressId\\\":${address.fields.linkAddressId},\\\"supportFwd\\\":${address.fields.supportFwd},\\\"info\\\":{\\\"value\\\":\\\"${deliveryAddressId}\\\"},\\\"url\\\":\\\"//buy.m.tmall.com/order/addressList.htm?enableStation=true&requestStationUrl=%2F%2Fstationpicker-i56.m.taobao.com%2Finland%2FshowStationInPhone.htm&_input_charset=utf8&hidetoolbar=true&bridgeMessage=true\\\",\\\"title\\\":\\\"管理收货地址\\\"},\\\"_request\\\":true}},\\\"${memo_}\\\":{\\\"ref\\\":\\\"1f528f8\\\",\\\"submit\\\":${tbGold_1.hidden.empty},\\\"bizName\\\":\\\"memo\\\",\\\"id\\\":\\\"${orderID}\\\",\\\"tag\\\":\\\"memo\\\",\\\"type\\\":\\\"input\\\",\\\"fields\\\":{\\\"name\\\":\\\"给卖家留言：\\\",\\\"placeholder\\\":\\\"选填:对本次交易的说明(建议填写已和卖家协商一致的内容)\\\",\\\"title\\\":\\\"买家留言：\\\",\\\"value\\\":\\\"\\\"},\\\"btn\\\":\\\"input\\\"},\\\"anonymous_1\\\":{\\\"submit\\\":${anonymous.submit},\\\"id\\\":\\\"${anonymous.id}\\\",\\\"tag\\\":\\\"${anonymous.tag}\\\",\\\"type\\\":\\\"${anonymous.type}\\\",\\\"fields\\\":{\\\"name\\\":\\\"匿名购买\\\",\\\"checked\\\":true},\\\"btn\\\":\\\"toggle\\\"},\\\"agencyPay_1\\\":{\\\"submit\\\":${agencyPay.submit},\\\"id\\\":\\\"${agencyPay.id}\\\",\\\"tag\\\":\\\"${agencyPay.tag}\\\",\\\"type\\\":\\\"${agencyPay.type}\\\",\\\"fields\\\":{\\\"name\\\":\\\"${agencyPay.fields.name}\\\",\\\"checked\\\":${agencyPay.fields.checked}},\\\"btn\\\":\\\"toggle\\\",\\\"_request\\\":true},\\\"${service_bwy_}@1\\\":{\\\"ref\\\":\\\"${service_bwy.ref}\\\",\\\"submit\\\":${service_bwy.submit},\\\"hidden\\\":{\\\"empty\\\":${service_bwy.hidden.empty},\\\"extensionMap\\\":{\\\"serviceType\\\":\\\"${service_bwy.hidden.extensionMap.serviceType}\\\",\\\"outId\\\":\\\"${service_bwy.hidden.extensionMap.outId}\\\",\\\"id\\\":\\\"${service_bwy.hidden.extensionMap.id}\\\"},\\\"notEmpty\\\":${service_bwy.hidden.notEmpty}},\\\"bizName\\\":\\\"ServiceMultiSelect\\\",\\\"id\\\":\\\"${service_bwy.id}\\\",\\\"tag\\\":\\\"${service_bwy.tag}\\\",\\\"type\\\":\\\"${service_bwy.type}\\\",\\\"fields\\\":{\\\"selectedIds\\\":[\\\"${service_bwy.fields.groups[0].optionId}\\\"],\\\"groups\\\":[{\\\"options\\\":[{\\\"name\\\":\\\"${service_bwy.fields.groups[0].name}\\\",\\\"optionId\\\":\\\"${service_bwy.fields.groups[0].optionId}\\\",\\\"value\\\":\\\"${service_bwy.fields.groups[0].value}\\\"}],\\\"required\\\":true}],\\\"title\\\":\\\"保无忧\\\"},\\\"btn\\\":\\\"multiSelect\\\",\\\"_request\\\":true},\\\"${service_yfx_}@1\\\":{\\\"ref\\\":\\\"${service_yfx.ref}\\\",\\\"submit\\\":${service_yfx.submit},\\\"hidden\\\":{\\\"empty\\\":${service_yfx.hidden.empty},\\\"extensionMap\\\":{\\\"serviceType\\\":\\\"${service_yfx.hidden.extensionMap.serviceType}\\\",\\\"outId\\\":\\\"${orderID}\\\",\\\"id\\\":\\\"${service_yfx.hidden.extensionMap.id}\\\"},\\\"notEmpty\\\":${service_yfx.hidden.notEmpty}},\\\"bizName\\\":\\\"ServiceMultiSelect\\\",\\\"id\\\":\\\"${service_yfx.id}\\\",\\\"tag\\\":\\\"${service_yfx.tag}\\\",\\\"type\\\":\\\"${service_yfx.type}\\\",\\\"fields\\\":{\\\"selectedIds\\\":[],\\\"groups\\\":[{\\\"options\\\":[{\\\"name\\\":\\\"${service_yfx.fields.groups[0].options[0].name}\\\",\\\"optionId\\\":\\\"${service_yfx.fields.groups[0].options[0].optionId}\\\",\\\"value\\\":\\\"${service_yfx.fields.groups[0].options[0].value}\\\"}],\\\"required\\\":false}],\\\"title\\\":\\\"运费险\\\"},\\\"btn\\\":\\\"multiSelect\\\",\\\"_request\\\":true}}\",\"linkage\":\"{\\\"common\\\":{\\\"compress\\\":${linkage.compress},\\\"submitParams\\\":\\\"${linkage.submitParams}\\\",\\\"validateParams\\\":\\\"${linkage.validateParams}\\\"},\\\"signature\\\":\\\"${signature}\\\"}\"}","ua":"098#E1hv8vvWvIUvUpCkvvvvvjiPP259QjnHRFSW6jrCPmPW0jrnPLdwsj3Un2qO6jnHPsyCvvBvpvvvFphvhZCCspFyvhCvphvvvvvvpCwaiQhvChCvCCptvpvhphvvvvGCvvLLQc4HKphv8hCvvvvvvhCvphvhJ9vvpuEvpvBTvvCmIyCvCjIvvh8kphvhJ9vvpu8ivpvUphvhJwQOyYkEvpvHLZ6hCEQ3vpVekfVEgQURMUsqQ44Ev+/eATfoTUNG//NETgLyAMzq/IT5APKNMQAesSABtaInCN06qnVTFYbRKgTQ3dV26Y8/ePeWTUORvMAHrOoS19qMt4s+6fAEsr8/3qTj+Uj864qWMOLjuCjcMUqYe8M8hKdie/eh/+JMsb08AK/qF+sW/gSDQbKRsWAr5q0RARzWsquUTaKTk9sUKXJtF4Jo6WkMkJuWSUqnGWPQS/k/eGsPKIkr5qARzf/TFquUgUoMsb0PKi/qF+zfdX/YFqKRsGTQ3dVj+U5bAd/4KI/qkfMWSOMbqdKRsWseD40NSUqWSquPKMu+5+MWKIKr5qARsb/TFqdtdEqPsbdfTIFG5QcMMneTFqKESGAYF+5+KgqWsb0OKI/qkfMWSOdWTSu8CYNi0PbCgWqBM447i+//zpURMUAA54fRsGFDAMAatILqm4fHtgue11h8iGL5DJs2MSMG5JVniGGRCqNh/E76lwsnKWueDTJ7s+kYkT4BSY6vsquEzi7TFNjBd+N+6fAEsr8/3qTj+Uj864qv/G4g5SSGTiMd9RAOlGGEvpCWp0Sxv8WfJHp0747BhC3qVmHoDOmfjLEcnhjEKBmAVA9aUExreut+mB+uaNoAdcpifvDrt8TJV6X+m7z9dit3CC+uafvA5kx/JmcG0vhCvvXvppvvvvmjvpvhphUvvv=="}`
 			}
 		}
 	}
@@ -285,6 +305,18 @@
 	}
 	.login a:nth-child(1){
 		margin-left: 5px;
+	}
+	.login .goods h2{
+		display: block;
+		color: #777777;
+		float: left;
+	}
+	.login .goods ul li{
+		list-style: none;
+		float: left;
+	}
+	.login .goods ul li a{
+		width: 100%;
 	}
 </style>
 
