@@ -1,5 +1,6 @@
 <template>
 	<div class="login">
+		<a href="/#test">测试post</a>
 		<textarea v-model="cookies"></textarea>
 		<input type="text" v-model="itemId" name="" placeholder="输入商品id">
 		<input type="text" v-model="username" name="">

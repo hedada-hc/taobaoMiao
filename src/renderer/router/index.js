@@ -11,6 +11,11 @@ export default new Router({
       component: require('@/components/Taobao/getOrder')
     },
     {
+      path:"/test",
+      name:"test",
+      component: require("@/components/Taobao/testPost")
+    },
+    {
       path: '*',
       redirect: '/'
     }
