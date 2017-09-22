@@ -147,22 +147,16 @@ export default {
 	createOrder(orderData){
 		//拼接付款数据 
 		var params = {
-			"data":{},
 			"hierarchy":{},
-			"linkage":{
-				"common":{
-					"compress":orderData.data.linkage.common.compress,
-					"submitParams":orderData.data.linkage.common.submitParams,
-					"validateParams":orderData.data.linkage.common.validateParams,
-				},
-				"signature":orderData.data.linkage.signature
-			}
+			"data":{},
+			"linkage":{}
 		}
+		//params.hierarchy.structure = orderData.data.hierarchy.structure
+		params.hierarchy = JSON.stringify({"structure":orderData.data.hierarchy.structure})
 		var unData = this.un(orderData.data.linkage.request, orderData.data.linkage.input)
-		console.log(unData)
 		params.data.anonymous_1 = orderData.data.data.anonymous_1
 		params.data.ncCheckCode_ncCheckCode1 = orderData.data.data.ncCheckCode_ncCheckCode1
-		params.data.submitOrder_1 = orderData.data.data.submitOrder_1
+		
 		for(var i=0;i<unData.length;i++){
 			if(unData[i] == "installmentPicker_1"){
 				params.data.installmentPicker_1 = orderData.data.data.installmentPicker_1
@@ -171,14 +165,79 @@ export default {
 				params.data[`${unData[i]}`] = orderData.data.data[`${unData[i]}`]	
 			}
 		}
+		params.data.submitOrder_1 = orderData.data.data.submitOrder_1
+		params.data.submitOrder_1._address = orderData.data.data.address_1
+		params.data.submitOrder_1._realPay = orderData.data.data.realPay_1
+		params.linkage = JSON.stringify({
+			"common":{
+				"compress":orderData.data.linkage.common.compress,
+				"submitParams":orderData.data.linkage.common.submitParams,
+				"validateParams":orderData.data.linkage.common.validateParams,
+			},
+			"signature":orderData.data.linkage.signature
+		})
 		
 		//获取其他数据
-		params.hierarchy = orderData.data.hierarchy.structure
+		params.data = JSON.stringify(params.data)
 		var data = {}
 		data.params = params
-		console.log(data)
 		data.params = JSON.stringify(data.params)
 		return JSON.stringify(data)
+	},
+	jiami(requestP){
+		var data = {
+			"params":{
+				"data":null,
+				"hierarchy":null,
+				"linkage":null
+			}
+		}
+		data.params.data = JSON.stringify(requestP.params.data)
+		data.params.hierarchy = JSON.stringify(requestP.params.hierarchy)
+		data.params.linkage = JSON.stringify(requestP.params.linkage)
+		data.params = JSON.stringify(data.params)
+		data = JSON.stringify(data)
+		return data
+	},
+	testCreateOrder(orderData, type = false){
+		//拼接付款数据 
+		var params = {
+			"hierarchy":{},
+			"data":{},
+			"linkage":{}
+		}
+		//params.hierarchy.structure = orderData.data.hierarchy.structure
+		params.hierarchy = {"structure":orderData.data.hierarchy.structure}
+		var unData = this.un(orderData.data.linkage.request, orderData.data.linkage.input)
+		params.data.anonymous_1 = orderData.data.data.anonymous_1
+		params.data.ncCheckCode_ncCheckCode1 = orderData.data.data.ncCheckCode_ncCheckCode1
+		
+		for(var i=0;i<unData.length;i++){
+			if(unData[i] == "installmentPicker_1"){
+				params.data.installmentPicker_1 = orderData.data.data.installmentPicker_1
+				params.data.installmentToggle_1 = orderData.data.data.installmentToggle_1
+			}else{
+				params.data[`${unData[i]}`] = orderData.data.data[`${unData[i]}`]	
+			}
+		}
+		params.data.submitOrder_1 = orderData.data.data.submitOrder_1
+		params.data.submitOrder_1._address = orderData.data.data.address_1
+		params.data.submitOrder_1._realPay = orderData.data.data.realPay_1
+		params.linkage = {
+			"common":{
+				"compress":orderData.data.linkage.common.compress,
+				"submitParams":orderData.data.linkage.common.submitParams,
+				"validateParams":orderData.data.linkage.common.validateParams,
+			},
+			"signature":orderData.data.linkage.signature
+		}
+		
+		//获取其他数据
+		var data = {}
+		data.params = params
+		data.params = data.params
+		if(type) return data;
+		return this.jiami(data);
 	},
 	un(arr1,arr2){
 		var arr = arr1.concat(arr2);

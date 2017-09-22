@@ -43,8 +43,8 @@
   				goods:{
   					"sku":null
   				},
-  				itemId:"554918477081",
-  				sku:"3614573019782",
+  				itemId:"555058327527",
+  				sku:"",
   				realPay:{},
   				goodsCoupon:{},
   				test_md5:""
@@ -230,20 +230,27 @@
 				})
 			},
 			createOrder(){
-				var data = this.hezone.createOrder(this.realPay);
+				var data = this.hezone.testCreateOrder(this.realPay);
 				var sign = this.hezone.deSign(this.cookies, data)
-				var url = `https://h5acs.m.tmall.com/h5/mtop.trade.createorder.h5/3.0/?appKey=12574478&t=${sign.time}&sign=${sign.sign}&api=mtop.trade.createOrder.h5&v=3.0&type=originaljson&timeout=20000&dataType=json&isSec=1&ecode=1&ttid=%23b%23ip%23%23_h5&AntiFlood=true&LoginRequest=true&H5Request=true&x-itemid=${this.itemId}&x-uid=${this.goods['x-uid']}`
+				var url = `https://h5acs.m.tmall.com/h5/mtop.trade.createorder.h5/3.0/?jsv=2.4.2&appKey=12574478&t=${sign.time}&sign=${sign.sign}&api=mtop.trade.createOrder.h5&v=3.0&type=originaljson&timeout=20000&dataType=json&isSec=1&ecode=1&ttid=%23b%23ip%23%23_h5&AntiFlood=true&LoginRequest=true&H5Request=true&submitref=0a67f6&x-itemid=${this.itemId}&x-uid=${this.goods['x-uid']}`
+				console.log(escape(data))
+				console.log(this.cookies)
 				console.log(url)
+				/**
 				superagent.post(url)
-					.type("from")
-					.set("Content-type","application/x-www-form-urlencoded")
-					.set("cookie",this.cookies)
+					.type('form')
+					.set("Host","h5acs.m.tmall.com")
+					.set("Connection","keep-alive")
+					.set("Content-Length",data.length)
+					.set("Origin","https://buy.m.tmall.com")
+					.set("Cookie",this.cookies)
 					.set("User-Agent","Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1")
-					.set("referer",`https://buy.m.tmall.com/order/confirmOrderWap.htm?enc=%3F&itemId=${this.itemId}&exParams=%7B%7D&skuId=${this.sku}&quantity=1&userId=${this.goods.userId}&buyNow=true&_input_charset=utf-8&x-itemid=${this.itemId}`)
-					.send(`data=${data}&ua=098#E1hvtpvWvKgvjQCkvvvvvjiPP259gjECPsFwQj1VPmP91jE2Rs5v6jrPRFSwQjT5vpvhvvmv99GCvvLLQc4HKphv8vvvvvCvpvvvvvmvL6CvmUWvvUCPphvU9Qvv9hYvpvk2vvmvL6CvmUREvpvHnvmv9jeivpvUvvmvbY6k0363vpUokPo4bRmZMOzTQW5ETiMQzKL829Ni3JcbTIZjAJJxqOFqlP6EtI29yKod2Pqr5YTM/awm2Kc4qUbulqMWSNkq5dKR6+Tr5qsYKt622K0vQ8o69wMR+Om13fTEAr8t5/AZ0f9W//77rEVqFrjwdX/GFdS4C9Pd3RoqMIIR/JK8/g/+5+MWKi/qFddqSGAYFqK8dEqPsbuNKgTq/bMWSO/q0K7WMp5DKST8M4U8/MuftWVqF+sWdX/GFGFrsW/Tkb5eKJf8/fF5KJ4ttrPLdX/Gkbev6q/TFq0n+UeMsb0PKtTqFrjJdrzkDGmylG0GFdkRKUSp6fKnSU7Sz9Mqtib9DP2nAG2+3N/7/iWEmWKyqOk69Ws8KOkg5S0EvMTlQRJ2qUI2mR0EdYdT5QsFqnVq9q0Hs+0qkbV2dG6PhG4iM+PYFQMMdSj9FSeW2S5d9/k4/iGRlM0EqG81D1bjgXc+9JmhlG/YkfmC+OcB6fkvKEq1zvG2qnVq9q0Hs+0qkbV2gXZRmSSCiI5rkvqqgO05AuNLCMSyk8NhtISEvMAXtWd3DpNXgO769fAU6GKQ3bTEKOjbQPAfldz+DawhgERS0fohQvqGDJzpMEb/M/TjtgbrAQ68taFI0dkW6wkMkbevKUsPARuHMO5ekMsq/rLd5S272pcYrRzpKIqWAqTPKIA/Fa2P+XNrkRu22pP5kfL7MUZEvpCWvHBBvvw6afFEDLKAWyVxI8oQ+ul68NoxfwoKHAiHife9kCVZfvDrsjc6hfINPfmBYE7reB6ksWFy6C0XwyLp+neYr2E9ZRAn3w0AhvhCvvOvCvvvphvtvpvhvvvvvU6CvChvC2+C9UvvvvvvvvCvpv2B4FyCvvpvvvvv3QhvCvvUvvv=`)
+					.send(`data=${escape(data)}`)
 					.end((error, result)=>{
+						console.log(result)
 						console.log(result.text)
 					})
+				*/
 			},
 			queryCoupon(){
 				var sign = this.hezone.deSign(this.cookies, `{"itemId":"${this.itemId}"}`);
