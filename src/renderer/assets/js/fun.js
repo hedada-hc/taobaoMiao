@@ -123,15 +123,39 @@ export default {
 			var isTmp = cookie[i].split("=")[0]
 			if(tmp == ''){
 				tmp += cookie[i].split(";")[0]
-				tmp_cookie = tmp_cookie.replace(`/${isTmp}=(.*?);/`, cookie[i].split(";")[0])
+				tmp_cookie = tmp_cookie.replace(`/${isTmp}=([\w;?]+)/`, cookie[i].split(";")[0])
 			}else{
 				tmp += `; ${cookie[i].split(";")[0]}`
-				tmp_cookie = tmp_cookie.replace(`/${isTmp}=(.*?);/`, `; ${cookie[i].split(";")[0]}`)
+				tmp_cookie = tmp_cookie.replace(`/${isTmp}=([\w;?]+)/`, `; ${cookie[i].split(";")[0]}`)
 			}
 		}
 		tmp_cookie += tmp;
 		console.log(tmp_cookie);
 		return tmp_cookie;
+	},
+	replaceCookie(tmp_cookie,cookie){
+		for(var i=0;i<cookie.length;i++){
+			var isTmp = cookie[i].split("=")[0]
+			console.log(cookie[i].split(";")[0])
+			if(/_m_h5_tk=/.test(cookie[i].split(";")[0])){
+				tmp_cookie = tmp_cookie.replace(/_m_h5_tk=([\w-?;?]+)/, cookie[i].split(";")[0]+";")
+			}else{
+				tmp_cookie = tmp_cookie.replace(/_m_h5_tk_enc=([\w-?;?]+)/, cookie[i].split(";")[0]+";")
+			}
+		}
+		console.log(tmp_cookie);
+		return tmp_cookie;
+	},
+	LoginCookie(cookie){
+		var tmpCookie = '';
+		var nick = "";
+		for(var i=0;i<cookie.length;i++){
+			tmpCookie += `${cookie[i].name}=${cookie[i].value}; `
+			if(cookie[i].name == "tracknick"){
+				nick = unescape(decodeURIComponent(cookie[i].value).replace(/\\?\u/g, "%u"));
+			}
+		}
+		return {"nick":nick, "cookie":tmpCookie, "time":new Date().getTime()};
 	},
 	testCreateOrder(orderData){
 		var params = JSON.stringify({
@@ -256,5 +280,47 @@ export default {
 			}
 		}
 		return false;
+	},
+	encrypt(data){
+		var setRSA = new RSAKey();
+        setRSA.setPublic(rsa_n, rsa_e);
+        var res = setRSA.encrypt(data);
+        return linebrk(hex2b64(res), 64);
+	},
+	localAdd(name,value){
+		var local = window.localStorage;
+		if(typeof value == "object"){
+			local[name] = JSON.stringify(value)
+		}else{
+			local[name] = value
+		}
+	},
+	localQuery(name = null){
+		var local = window.localStorage;
+		if(name == null) return local
+		else return local.getItem(name)
+	},
+	localDel(name){
+		var local = window.localStorage;
+		return local.removeItem(name)
+	},
+	queryBoughtList(order){
+		var tmp = [];
+		for(var i=0;i<order.length;i++){
+			for(var item in order[i]){
+				item = order[i][item]
+				tmp.push({
+					"mainOrderId":item[0].cellData[0].fields.mainOrderId,
+					"sellerNick":item[0].cellData[0].fields.sellerNick,
+					"order_status":item[1].cellData[1].fields.text,
+					"order_status":item[1].cellData[1].fields.text,
+					"title":item[2].cellData[0].fields.title,
+					"skuText":item[2].cellData[0].fields.skuText,
+					"price":item[2].cellData[0].fields.priceInfo.promotion,
+					"pic": "http:"+item[2].cellData[0].fields.pic,
+				});
+			}
+		}
+		return tmp;
 	}
 }

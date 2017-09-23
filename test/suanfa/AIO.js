@@ -1,157 +1,128 @@
-function ceshi(e) {
-        function t(e, t) {
-            return e << t | e >>> 32 - t
-        }
-        function n(e, t) {
-            var n, o, r, i, s;
-            return r = 2147483648 & e,
-            i = 2147483648 & t,
-            n = 1073741824 & e,
-            o = 1073741824 & t,
-            s = (1073741823 & e) + (1073741823 & t),
-            n & o ? 2147483648 ^ s ^ r ^ i : n | o ? 1073741824 & s ? 3221225472 ^ s ^ r ^ i : 1073741824 ^ s ^ r ^ i : s ^ r ^ i
-        }
-        function o(e, t, n) {
-            return e & t | ~e & n
-        }
-        function r(e, t, n) {
-            return e & n | t & ~n
-        }
-        function i(e, t, n) {
-            return e ^ t ^ n
-        }
-        function s(e, t, n) {
-            return t ^ (e | ~n)
-        }
-        function a(e, r, i, s, a, p, u) {
-            return e = n(e, n(n(o(r, i, s), a), u)),
-            n(t(e, p), r)
-        }
-        function p(e, o, i, s, a, p, u) {
-            return e = n(e, n(n(r(o, i, s), a), u)),
-            n(t(e, p), o)
-        }
-        function u(e, o, r, s, a, p, u) {
-            return e = n(e, n(n(i(o, r, s), a), u)),
-            n(t(e, p), o)
-        }
-        function c(e, o, r, i, a, p, u) {
-            return e = n(e, n(n(s(o, r, i), a), u)),
-            n(t(e, p), o)
-        }
-        function d(e) {
-            for (var t, n = e.length, o = n + 8, r = (o - o % 64) / 64, i = 16 * (r + 1), s = new Array(i - 1), a = 0, p = 0; n > p; )
-                t = (p - p % 4) / 4,
-                a = p % 4 * 8,
-                s[t] = s[t] | e.charCodeAt(p) << a,
-                p++;
-            return t = (p - p % 4) / 4,
-            a = p % 4 * 8,
-            s[t] = s[t] | 128 << a,
-            s[i - 2] = n << 3,
-            s[i - 1] = n >>> 29,
-            s
-        }
-        function l(e) {
-            var t, n, o = "", r = "";
-            for (n = 0; 3 >= n; n++)
-                t = e >>> 8 * n & 255,
-                r = "0" + t.toString(16),
-                o += r.substr(r.length - 2, 2);
-            return o
-        }
-        function f(e) {
-            e = e.replace(/\r\n/g, "\n");
-            for (var t = "", n = 0; n < e.length; n++) {
-                var o = e.charCodeAt(n);
-                128 > o ? t += String.fromCharCode(o) : o > 127 && 2048 > o ? (t += String.fromCharCode(o >> 6 | 192),
-                t += String.fromCharCode(63 & o | 128)) : (t += String.fromCharCode(o >> 12 | 224),
-                t += String.fromCharCode(o >> 6 & 63 | 128),
-                t += String.fromCharCode(63 & o | 128))
-            }
-            console.log(t)
-            return t
-        }
-        var m, h, _, v, g, R, E, y, w, O = [], S = 7, T = 12, q = 17, C = 22, A = 5, N = 9, b = 14, x = 20, k = 4, J = 11, L = 16, P = 23, I = 6, U = 10, H = 15, j = 21;
-        for (e = f(e),
-        O = d(e),
-        R = 1732584193,
-        E = 4023233417,
-        y = 2562383102,
-        w = 271733878,
-        m = 0; m < O.length; m += 16)
-            h = R,
-            _ = E,
-            v = y,
-            g = w,
-            R = a(R, E, y, w, O[m + 0], S, 3614090360),
-            w = a(w, R, E, y, O[m + 1], T, 3905402710),
-            y = a(y, w, R, E, O[m + 2], q, 606105819),
-            E = a(E, y, w, R, O[m + 3], C, 3250441966),
-            R = a(R, E, y, w, O[m + 4], S, 4118548399),
-            w = a(w, R, E, y, O[m + 5], T, 1200080426),
-            y = a(y, w, R, E, O[m + 6], q, 2821735955),
-            E = a(E, y, w, R, O[m + 7], C, 4249261313),
-            R = a(R, E, y, w, O[m + 8], S, 1770035416),
-            w = a(w, R, E, y, O[m + 9], T, 2336552879),
-            y = a(y, w, R, E, O[m + 10], q, 4294925233),
-            E = a(E, y, w, R, O[m + 11], C, 2304563134),
-            R = a(R, E, y, w, O[m + 12], S, 1804603682),
-            w = a(w, R, E, y, O[m + 13], T, 4254626195),
-            y = a(y, w, R, E, O[m + 14], q, 2792965006),
-            E = a(E, y, w, R, O[m + 15], C, 1236535329),
-            R = p(R, E, y, w, O[m + 1], A, 4129170786),
-            w = p(w, R, E, y, O[m + 6], N, 3225465664),
-            y = p(y, w, R, E, O[m + 11], b, 643717713),
-            E = p(E, y, w, R, O[m + 0], x, 3921069994),
-            R = p(R, E, y, w, O[m + 5], A, 3593408605),
-            w = p(w, R, E, y, O[m + 10], N, 38016083),
-            y = p(y, w, R, E, O[m + 15], b, 3634488961),
-            E = p(E, y, w, R, O[m + 4], x, 3889429448),
-            R = p(R, E, y, w, O[m + 9], A, 568446438),
-            w = p(w, R, E, y, O[m + 14], N, 3275163606),
-            y = p(y, w, R, E, O[m + 3], b, 4107603335),
-            E = p(E, y, w, R, O[m + 8], x, 1163531501),
-            R = p(R, E, y, w, O[m + 13], A, 2850285829),
-            w = p(w, R, E, y, O[m + 2], N, 4243563512),
-            y = p(y, w, R, E, O[m + 7], b, 1735328473),
-            E = p(E, y, w, R, O[m + 12], x, 2368359562),
-            R = u(R, E, y, w, O[m + 5], k, 4294588738),
-            w = u(w, R, E, y, O[m + 8], J, 2272392833),
-            y = u(y, w, R, E, O[m + 11], L, 1839030562),
-            E = u(E, y, w, R, O[m + 14], P, 4259657740),
-            R = u(R, E, y, w, O[m + 1], k, 2763975236),
-            w = u(w, R, E, y, O[m + 4], J, 1272893353),
-            y = u(y, w, R, E, O[m + 7], L, 4139469664),
-            E = u(E, y, w, R, O[m + 10], P, 3200236656),
-            R = u(R, E, y, w, O[m + 13], k, 681279174),
-            w = u(w, R, E, y, O[m + 0], J, 3936430074),
-            y = u(y, w, R, E, O[m + 3], L, 3572445317),
-            E = u(E, y, w, R, O[m + 6], P, 76029189),
-            R = u(R, E, y, w, O[m + 9], k, 3654602809),
-            w = u(w, R, E, y, O[m + 12], J, 3873151461),
-            y = u(y, w, R, E, O[m + 15], L, 530742520),
-            E = u(E, y, w, R, O[m + 2], P, 3299628645),
-            R = c(R, E, y, w, O[m + 0], I, 4096336452),
-            w = c(w, R, E, y, O[m + 7], U, 1126891415),
-            y = c(y, w, R, E, O[m + 14], H, 2878612391),
-            E = c(E, y, w, R, O[m + 5], j, 4237533241),
-            R = c(R, E, y, w, O[m + 12], I, 1700485571),
-            w = c(w, R, E, y, O[m + 3], U, 2399980690),
-            y = c(y, w, R, E, O[m + 10], H, 4293915773),
-            E = c(E, y, w, R, O[m + 1], j, 2240044497),
-            R = c(R, E, y, w, O[m + 8], I, 1873313359),
-            w = c(w, R, E, y, O[m + 15], U, 4264355552),
-            y = c(y, w, R, E, O[m + 6], H, 2734768916),
-            E = c(E, y, w, R, O[m + 13], j, 1309151649),
-            R = c(R, E, y, w, O[m + 4], I, 4149444226),
-            w = c(w, R, E, y, O[m + 11], U, 3174756917),
-            y = c(y, w, R, E, O[m + 2], H, 718787259),
-            E = c(E, y, w, R, O[m + 9], j, 3951481745),
-            R = n(R, h),
-            E = n(E, _),
-            y = n(y, v),
-            w = n(w, g);
-        var D = l(R) + l(E) + l(y) + l(w);
-        return D.toLowerCase()
-    }
+ var dbits;var canary=0xdeadbeefcafe;var j_lm=((canary&0xffffff)==0xefcafe);function BigInteger(a,b,c){if(a!=null)
+        if("number"==typeof a)this.fromNumber(a,b,c);else if(b==null&&"string"!=typeof a)this.fromString(a,256);else this.fromString(a,b);}
+        function nbi(){return new BigInteger(null);}
+        function am1(i,x,w,j,c,n){while(--n>=0){var v=x*this[i++]+w[j]+c;c=Math.floor(v/0x4000000);w[j++]=v&0x3ffffff;}
+        return c;}
+        function am2(i,x,w,j,c,n){var xl=x&0x7fff,xh=x>>15;while(--n>=0){var l=this[i]&0x7fff;var h=this[i++]>>15;var m=xh*l+h*xl;l=xl*l+((m&0x7fff)<<15)+w[j]+(c&0x3fffffff);c=(l>>>30)+(m>>>15)+xh*h+(c>>>30);w[j++]=l&0x3fffffff;}
+        return c;}
+        function am3(i,x,w,j,c,n){var xl=x&0x3fff,xh=x>>14;while(--n>=0){var l=this[i]&0x3fff;var h=this[i++]>>14;var m=xh*l+h*xl;l=xl*l+((m&0x3fff)<<14)+w[j]+c;c=(l>>28)+(m>>14)+xh*h;w[j++]=l&0xfffffff;}
+        return c;}
+        if(j_lm&&(navigator.appName=="Microsoft Internet Explorer")){BigInteger.prototype.am=am2;dbits=30;}
+        else if(j_lm&&(navigator.appName!="Netscape")){BigInteger.prototype.am=am1;dbits=26;}
+        else{BigInteger.prototype.am=am3;dbits=28;}
+        BigInteger.prototype.DB=dbits;BigInteger.prototype.DM=((1<<dbits)-1);BigInteger.prototype.DV=(1<<dbits);var BI_FP=52;BigInteger.prototype.FV=Math.pow(2,BI_FP);BigInteger.prototype.F1=BI_FP-dbits;BigInteger.prototype.F2=2*dbits-BI_FP;var BI_RM="0123456789abcdefghijklmnopqrstuvwxyz";var BI_RC=new Array();var rr,vv;rr="0".charCodeAt(0);for(vv=0;vv<=9;++vv)BI_RC[rr++]=vv;rr="a".charCodeAt(0);for(vv=10;vv<36;++vv)BI_RC[rr++]=vv;rr="A".charCodeAt(0);for(vv=10;vv<36;++vv)BI_RC[rr++]=vv;function int2char(n){return BI_RM.charAt(n);}
+        function intAt(s,i){var c=BI_RC[s.charCodeAt(i)];return(c==null)?-1:c;}
+        function bnpCopyTo(r){for(var i=this.t-1;i>=0;--i)r[i]=this[i];r.t=this.t;r.s=this.s;}
+        function bnpFromInt(x){this.t=1;this.s=(x<0)?-1:0;if(x>0)this[0]=x;else if(x<-1)this[0]=x+this.DV;else this.t=0;}
+        function nbv(i){var r=nbi();r.fromInt(i);return r;}
+        function bnpFromString(s,b){var k;if(b==16)k=4;else if(b==8)k=3;else if(b==256)k=8;else if(b==2)k=1;else if(b==32)k=5;else if(b==4)k=2;else{this.fromRadix(s,b);return;}
+        this.t=0;this.s=0;var i=s.length,mi=false,sh=0;while(--i>=0){var x=(k==8)?s[i]&0xff:intAt(s,i);if(x<0){if(s.charAt(i)=="-")mi=true;continue;}
+        mi=false;if(sh==0)
+        this[this.t++]=x;else if(sh+k>this.DB){this[this.t-1]|=(x&((1<<(this.DB-sh))-1))<<sh;this[this.t++]=(x>>(this.DB-sh));}
+        else
+        this[this.t-1]|=x<<sh;sh+=k;if(sh>=this.DB)sh-=this.DB;}
+        if(k==8&&(s[0]&0x80)!=0){this.s=-1;if(sh>0)this[this.t-1]|=((1<<(this.DB-sh))-1)<<sh;}
+        this.clamp();if(mi)BigInteger.ZERO.subTo(this,this);}
+        function bnpClamp(){var c=this.s&this.DM;while(this.t>0&&this[this.t-1]==c)--this.t;}
+        function bnToString(b){if(this.s<0)return"-"+this.negate().toString(b);var k;if(b==16)k=4;else if(b==8)k=3;else if(b==2)k=1;else if(b==32)k=5;else if(b==4)k=2;else return this.toRadix(b);var km=(1<<k)-1,d,m=false,r="",i=this.t;var p=this.DB-(i*this.DB)%k;if(i-->0){if(p<this.DB&&(d=this[i]>>p)>0){m=true;r=int2char(d);}
+        while(i>=0){if(p<k){d=(this[i]&((1<<p)-1))<<(k-p);d|=this[--i]>>(p+=this.DB-k);}
+        else{d=(this[i]>>(p-=k))&km;if(p<=0){p+=this.DB;--i;}}
+        if(d>0)m=true;if(m)r+=int2char(d);}}
+        return m?r:"0";}
+        function bnNegate(){var r=nbi();BigInteger.ZERO.subTo(this,r);return r;}
+        function bnAbs(){return(this.s<0)?this.negate():this;}
+        function bnCompareTo(a){var r=this.s-a.s;if(r!=0)return r;var i=this.t;r=i-a.t;if(r!=0)return(this.s<0)?-r:r;while(--i>=0)if((r=this[i]-a[i])!=0)return r;return 0;}
+        function nbits(x){var r=1,t;if((t=x>>>16)!=0){x=t;r+=16;}
+        if((t=x>>8)!=0){x=t;r+=8;}
+        if((t=x>>4)!=0){x=t;r+=4;}
+        if((t=x>>2)!=0){x=t;r+=2;}
+        if((t=x>>1)!=0){x=t;r+=1;}
+        return r;}
+        function bnBitLength(){if(this.t<=0)return 0;return this.DB*(this.t-1)+nbits(this[this.t-1]^(this.s&this.DM));}
+        function bnpDLShiftTo(n,r){var i;for(i=this.t-1;i>=0;--i)r[i+n]=this[i];for(i=n-1;i>=0;--i)r[i]=0;r.t=this.t+n;r.s=this.s;}
+        function bnpDRShiftTo(n,r){for(var i=n;i<this.t;++i)r[i-n]=this[i];r.t=Math.max(this.t-n,0);r.s=this.s;}
+        function bnpLShiftTo(n,r){var bs=n%this.DB;var cbs=this.DB-bs;var bm=(1<<cbs)-1;var ds=Math.floor(n/this.DB),c=(this.s<<bs)&this.DM,i;for(i=this.t-1;i>=0;--i){r[i+ds+1]=(this[i]>>cbs)|c;c=(this[i]&bm)<<bs;}
+        for(i=ds-1;i>=0;--i)r[i]=0;r[ds]=c;r.t=this.t+ds+1;r.s=this.s;r.clamp();}
+        function bnpRShiftTo(n,r){r.s=this.s;var ds=Math.floor(n/this.DB);if(ds>=this.t){r.t=0;return;}
+        var bs=n%this.DB;var cbs=this.DB-bs;var bm=(1<<bs)-1;r[0]=this[ds]>>bs;for(var i=ds+1;i<this.t;++i){r[i-ds-1]|=(this[i]&bm)<<cbs;r[i-ds]=this[i]>>bs;}
+        if(bs>0)r[this.t-ds-1]|=(this.s&bm)<<cbs;r.t=this.t-ds;r.clamp();}
+        function bnpSubTo(a,r){var i=0,c=0,m=Math.min(a.t,this.t);while(i<m){c+=this[i]-a[i];r[i++]=c&this.DM;c>>=this.DB;}
+        if(a.t<this.t){c-=a.s;while(i<this.t){c+=this[i];r[i++]=c&this.DM;c>>=this.DB;}
+        c+=this.s;}
+        else{c+=this.s;while(i<a.t){c-=a[i];r[i++]=c&this.DM;c>>=this.DB;}
+        c-=a.s;}
+        r.s=(c<0)?-1:0;if(c<-1)r[i++]=this.DV+c;else if(c>0)r[i++]=c;r.t=i;r.clamp();}
+        function bnpMultiplyTo(a,r){var x=this.abs(),y=a.abs();var i=x.t;r.t=i+y.t;while(--i>=0)r[i]=0;for(i=0;i<y.t;++i)r[i+x.t]=x.am(0,y[i],r,i,0,x.t);r.s=0;r.clamp();if(this.s!=a.s)BigInteger.ZERO.subTo(r,r);}
+        function bnpSquareTo(r){var x=this.abs();var i=r.t=2*x.t;while(--i>=0)r[i]=0;for(i=0;i<x.t-1;++i){var c=x.am(i,x[i],r,2*i,0,1);if((r[i+x.t]+=x.am(i+1,2*x[i],r,2*i+1,c,x.t-i-1))>=x.DV){r[i+x.t]-=x.DV;r[i+x.t+1]=1;}}
+        if(r.t>0)r[r.t-1]+=x.am(i,x[i],r,2*i,0,1);r.s=0;r.clamp();}
+        function bnpDivRemTo(m,q,r){var pm=m.abs();if(pm.t<=0)return;var pt=this.abs();if(pt.t<pm.t){if(q!=null)q.fromInt(0);if(r!=null)this.copyTo(r);return;}
+        if(r==null)r=nbi();var y=nbi(),ts=this.s,ms=m.s;var nsh=this.DB-nbits(pm[pm.t-1]);if(nsh>0){pm.lShiftTo(nsh,y);pt.lShiftTo(nsh,r);}
+        else{pm.copyTo(y);pt.copyTo(r);}
+        var ys=y.t;var y0=y[ys-1];if(y0==0)return;var yt=y0*(1<<this.F1)+((ys>1)?y[ys-2]>>this.F2:0);var d1=this.FV/yt,d2=(1<<this.F1)/yt,e=1<<this.F2;var i=r.t,j=i-ys,t=(q==null)?nbi():q;y.dlShiftTo(j,t);if(r.compareTo(t)>=0){r[r.t++]=1;r.subTo(t,r);}
+        BigInteger.ONE.dlShiftTo(ys,t);t.subTo(y,y);while(y.t<ys)y[y.t++]=0;while(--j>=0){var qd=(r[--i]==y0)?this.DM:Math.floor(r[i]*d1+(r[i-1]+e)*d2);if((r[i]+=y.am(0,qd,r,j,0,ys))<qd){y.dlShiftTo(j,t);r.subTo(t,r);while(r[i]<--qd)r.subTo(t,r);}}
+        if(q!=null){r.drShiftTo(ys,q);if(ts!=ms)BigInteger.ZERO.subTo(q,q);}
+        r.t=ys;r.clamp();if(nsh>0)r.rShiftTo(nsh,r);if(ts<0)BigInteger.ZERO.subTo(r,r);}
+        function bnMod(a){var r=nbi();this.abs().divRemTo(a,null,r);if(this.s<0&&r.compareTo(BigInteger.ZERO)>0)a.subTo(r,r);return r;}
+        function Classic(m){this.m=m;}
+        function cConvert(x){if(x.s<0||x.compareTo(this.m)>=0)return x.mod(this.m);else return x;}
+        function cRevert(x){return x;}
+        function cReduce(x){x.divRemTo(this.m,null,x);}
+        function cMulTo(x,y,r){x.multiplyTo(y,r);this.reduce(r);}
+        function cSqrTo(x,r){x.squareTo(r);this.reduce(r);}
+        Classic.prototype.convert=cConvert;Classic.prototype.revert=cRevert;Classic.prototype.reduce=cReduce;Classic.prototype.mulTo=cMulTo;Classic.prototype.sqrTo=cSqrTo;function bnpInvDigit(){if(this.t<1)return 0;var x=this[0];if((x&1)==0)return 0;var y=x&3;y=(y*(2-(x&0xf)*y))&0xf;y=(y*(2-(x&0xff)*y))&0xff;y=(y*(2-(((x&0xffff)*y)&0xffff)))&0xffff;y=(y*(2-x*y%this.DV))%this.DV;return(y>0)?this.DV-y:-y;}
+        function Montgomery(m){this.m=m;this.mp=m.invDigit();this.mpl=this.mp&0x7fff;this.mph=this.mp>>15;this.um=(1<<(m.DB-15))-1;this.mt2=2*m.t;}
+        function montConvert(x){var r=nbi();x.abs().dlShiftTo(this.m.t,r);r.divRemTo(this.m,null,r);if(x.s<0&&r.compareTo(BigInteger.ZERO)>0)this.m.subTo(r,r);return r;}
+        function montRevert(x){var r=nbi();x.copyTo(r);this.reduce(r);return r;}
+        function montReduce(x){while(x.t<=this.mt2)
+        x[x.t++]=0;for(var i=0;i<this.m.t;++i){var j=x[i]&0x7fff;var u0=(j*this.mpl+(((j*this.mph+(x[i]>>15)*this.mpl)&this.um)<<15))&x.DM;j=i+this.m.t;x[j]+=this.m.am(0,u0,x,i,0,this.m.t);while(x[j]>=x.DV){x[j]-=x.DV;x[++j]++;}}
+        x.clamp();x.drShiftTo(this.m.t,x);if(x.compareTo(this.m)>=0)x.subTo(this.m,x);}
+        function montSqrTo(x,r){x.squareTo(r);this.reduce(r);}
+        function montMulTo(x,y,r){x.multiplyTo(y,r);this.reduce(r);}
+        Montgomery.prototype.convert=montConvert;Montgomery.prototype.revert=montRevert;Montgomery.prototype.reduce=montReduce;Montgomery.prototype.mulTo=montMulTo;Montgomery.prototype.sqrTo=montSqrTo;function bnpIsEven(){return((this.t>0)?(this[0]&1):this.s)==0;}
+        function bnpExp(e,z){if(e>0xffffffff||e<1)return BigInteger.ONE;var r=nbi(),r2=nbi(),g=z.convert(this),i=nbits(e)-1;g.copyTo(r);while(--i>=0){z.sqrTo(r,r2);if((e&(1<<i))>0)z.mulTo(r2,g,r);else{var t=r;r=r2;r2=t;}}
+        return z.revert(r);}
+        function bnModPowInt(e,m){var z;if(e<256||m.isEven())z=new Classic(m);else z=new Montgomery(m);return this.exp(e,z);}
+        BigInteger.prototype.copyTo=bnpCopyTo;BigInteger.prototype.fromInt=bnpFromInt;BigInteger.prototype.fromString=bnpFromString;BigInteger.prototype.clamp=bnpClamp;BigInteger.prototype.dlShiftTo=bnpDLShiftTo;BigInteger.prototype.drShiftTo=bnpDRShiftTo;BigInteger.prototype.lShiftTo=bnpLShiftTo;BigInteger.prototype.rShiftTo=bnpRShiftTo;BigInteger.prototype.subTo=bnpSubTo;BigInteger.prototype.multiplyTo=bnpMultiplyTo;BigInteger.prototype.squareTo=bnpSquareTo;BigInteger.prototype.divRemTo=bnpDivRemTo;BigInteger.prototype.invDigit=bnpInvDigit;BigInteger.prototype.isEven=bnpIsEven;BigInteger.prototype.exp=bnpExp;BigInteger.prototype.toString=bnToString;BigInteger.prototype.negate=bnNegate;BigInteger.prototype.abs=bnAbs;BigInteger.prototype.compareTo=bnCompareTo;BigInteger.prototype.bitLength=bnBitLength;BigInteger.prototype.mod=bnMod;BigInteger.prototype.modPowInt=bnModPowInt;BigInteger.ZERO=nbv(0);BigInteger.ONE=nbv(1);function Arcfour(){this.i=0;this.j=0;this.S=new Array();}
+        function ARC4init(key){var i,j,t;for(i=0;i<256;++i)
+        this.S[i]=i;j=0;for(i=0;i<256;++i){j=(j+this.S[i]+key[i%key.length])&255;t=this.S[i];this.S[i]=this.S[j];this.S[j]=t;}
+        this.i=0;this.j=0;}
+        function ARC4next(){var t;this.i=(this.i+1)&255;this.j=(this.j+this.S[this.i])&255;t=this.S[this.i];this.S[this.i]=this.S[this.j];this.S[this.j]=t;return this.S[(t+this.S[this.i])&255];}
+        Arcfour.prototype.init=ARC4init;Arcfour.prototype.next=ARC4next;function prng_newstate(){return new Arcfour();}
+        var rng_psize=256;var rng_state;var rng_pool;var rng_pptr;function rng_seed_int(x){rng_pool[rng_pptr++]^=x&255;rng_pool[rng_pptr++]^=(x>>8)&255;rng_pool[rng_pptr++]^=(x>>16)&255;rng_pool[rng_pptr++]^=(x>>24)&255;if(rng_pptr>=rng_psize)rng_pptr-=rng_psize;}
+        function rng_seed_time(){rng_seed_int(new Date().getTime());}
+        if(rng_pool==null){rng_pool=new Array();rng_pptr=0;var t;if(window.crypto&&window.crypto.getRandomValues){var ua=new Uint8Array(32);window.crypto.getRandomValues(ua);for(t=0;t<32;++t)
+        rng_pool[rng_pptr++]=ua[t];}
+        if(navigator.appName=="Netscape"&&navigator.appVersion<"5"&&window.crypto){var z=window.crypto.random(32);for(t=0;t<z.length;++t)
+        rng_pool[rng_pptr++]=z.charCodeAt(t)&255;}
+        while(rng_pptr<rng_psize){t=Math.floor(65536*Math.random());rng_pool[rng_pptr++]=t>>>8;rng_pool[rng_pptr++]=t&255;}
+        rng_pptr=0;rng_seed_time();}
+        function rng_get_byte(){if(rng_state==null){rng_seed_time();rng_state=prng_newstate();rng_state.init(rng_pool);for(rng_pptr=0;rng_pptr<rng_pool.length;++rng_pptr)
+        rng_pool[rng_pptr]=0;rng_pptr=0;}
+        return rng_state.next();}
+        function rng_get_bytes(ba){var i;for(i=0;i<ba.length;++i)ba[i]=rng_get_byte();}
+        function SecureRandom(){}
+        SecureRandom.prototype.nextBytes=rng_get_bytes;function parseBigInt(str,r){return new BigInteger(str,r);}
+        function linebrk(s,n){var ret="";var i=0;while(i+n<s.length){ret+=s.substring(i,i+n)+"\n";i+=n;}
+        return ret+s.substring(i,s.length);}
+        function byte2Hex(b){if(b<0x10)
+        return"0"+b.toString(16);else
+        return b.toString(16);}
+        function pkcs1pad2(s,n){if(n<s.length+11){console.log("Message too long for RSA");return null;}
+        var ba=new Array();var i=s.length-1;while(i>=0&&n>0){var c=s.charCodeAt(i--);if(c<128){ba[--n]=c;}
+        else if((c>127)&&(c<2048)){ba[--n]=(c&63)|128;ba[--n]=(c>>6)|192;}
+        else{ba[--n]=(c&63)|128;ba[--n]=((c>>6)&63)|128;ba[--n]=(c>>12)|224;}}
+        ba[--n]=0;var rng=new SecureRandom();var x=new Array();while(n>2){x[0]=0;while(x[0]==0)rng.nextBytes(x);ba[--n]=x[0];}
+        ba[--n]=2;ba[--n]=0;return new BigInteger(ba);}
+        function RSAKey(){this.n=null;this.e=0;this.d=null;this.p=null;this.q=null;this.dmp1=null;this.dmq1=null;this.coeff=null;}
+        function RSASetPublic(N,E){if(N!=null&&E!=null&&N.length>0&&E.length>0){this.n=parseBigInt(N,16);this.e=parseInt(E,16);}
+        else
+        console.log("Invalid RSA public key");}
+        function RSADoPublic(x){return x.modPowInt(this.e,this.n);}
+        function RSAEncrypt(text){var m=pkcs1pad2(text,(this.n.bitLength()+7)>>3);if(m==null)return null;var c=this.doPublic(m);if(c==null)return null;var h=c.toString(16);if((h.length&1)==0)return h;else return"0"+h;}
+        RSAKey.prototype.doPublic=RSADoPublic;RSAKey.prototype.setPublic=RSASetPublic;RSAKey.prototype.encrypt=RSAEncrypt;var b64map="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";var b64padchar="=";function hex2b64(h){var i;var c;var ret="";for(i=0;i+3<=h.length;i+=3){c=parseInt(h.substring(i,i+3),16);ret+=b64map.charAt(c>>6)+b64map.charAt(c&63);}
+        if(i+1==h.length){c=parseInt(h.substring(i,i+1),16);ret+=b64map.charAt(c<<2);}
+        else if(i+2==h.length){c=parseInt(h.substring(i,i+2),16);ret+=b64map.charAt(c>>2)+b64map.charAt((c&3)<<4);}
+        while((ret.length&3)>0)ret+=b64padchar;return ret;}
+
+        var rsa_n = 'B98DC71833036E62C92BF6ABA5DFDDABBD44E52932CAE2026ED2A71C22E7681644A3233276F2EB7B29EC56CB720A3B8A8BFAEEA3E5E00D03E4E82203F676EBF5';
+        var rsa_e = '10001';

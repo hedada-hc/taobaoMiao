@@ -8,7 +8,10 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
+const ipc = require('electron').ipcMain;
+const session = require("electron").session;
 let mainWindow
+let tbWindow
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
@@ -20,13 +23,39 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     height: 600,
     useContentSize: true,
-    width: 1200
+    width: 1200,
+    center:true,
+    resizable:false,
+    frame:false,
+    hasShadow:true
   })
 
   mainWindow.loadURL(winURL)
-
+  mainWindow.webContents.openDevTools();
   mainWindow.on('closed', () => {
     mainWindow = null
+  })
+}
+
+//登录窗口
+function loginWindow(){
+  tbWindow = new BrowserWindow({
+    height:600,
+    width:400,
+    center:true,
+    resizable:false,
+    //frame:false,
+    hasShadow:true
+  })
+  tbWindow.loadURL("https://login.m.taobao.com/login.htm");
+  //found-in-page
+  //did-get-redirect-request
+  tbWindow.webContents.on("did-get-redirect-request", function(){
+
+    session.defaultSession.cookies.get({domain:".taobao.com"}, (error, cookies)=>{
+      mainWindow.webContents.send('loginTB',cookies)
+      tbWindow.close();
+    })
   })
 }
 
@@ -44,6 +73,23 @@ app.on('activate', () => {
   }
 })
 
+ipc.on("loginTB", function(){
+  loginWindow()
+})
+
+ipc.on("test", function(){
+  //先清空所有cookie
+  session.defaultSession.cookies.get({domain:".taobao.com"}, (error, cookies)=>{
+    mainWindow.webContents.send('loginTB',cookies)
+
+  })
+})
+
+//关闭窗口
+ipc.on("close", function(){
+  app.quit();
+  //mainWindow.close();
+})
 /**
  * Auto Updater
  *

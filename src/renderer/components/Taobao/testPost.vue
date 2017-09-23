@@ -14,6 +14,7 @@
 		<button @click="huanyuan">还原数据</button><br>
 		<button @click="jiami">加密数据</button><br>
 		<button @click="wanzheng">完整数据提取</button><br>
+		<button @click="encrypt">加密</button><br>
 		<a href="/">index</a>
 	</div>
 </template>
@@ -114,6 +115,9 @@
 				var data = this.hezone.testCreateOrder(JSON.parse(this.requestP),true);
 				this.requestP = data;
 				console.log(JSON.stringify(data))
+			},
+			encrypt(){
+				console.log(this.hezone.encrypt(this.times));
 			}
 		}
 	}
