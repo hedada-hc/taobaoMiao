@@ -390,7 +390,6 @@
 </script>
 
 <style type="text/css" lang="scss">
-
 	.login{
 		width: 500px;
 		margin: 0 auto;

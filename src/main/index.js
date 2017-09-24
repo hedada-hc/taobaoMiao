@@ -47,7 +47,7 @@ function loginWindow(){
     //frame:false,
     hasShadow:true
   })
-  tbWindow.loadURL("https://login.m.taobao.com/login.htm");
+  tbWindow.loadURL(`http://localhost:9080/src/main/login.html`);
   //found-in-page
   //did-get-redirect-request
   tbWindow.webContents.on("did-get-redirect-request", function(){
