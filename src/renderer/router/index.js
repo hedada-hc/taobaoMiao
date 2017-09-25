@@ -8,12 +8,27 @@ export default new Router({
     {
       path: '/',
       name: 'index',
-      component: require('@/components/Taobao/Index')
+      component: require('@/components/Taobao/order/order')
     },
     {
       path:"/order",
       name:"order",
-      component: require("@/components/Taobao/GetOrder")
+      component: require("@/components/Taobao/order/allOrder"),
+    },
+    {
+      path:"/order/waitpay",
+      name:"waitpay",
+      component: require("@/components/Taobao/order/waitPay")
+    },
+    {
+      path:"/order/waitconfirm",
+      name:"waitconfirm",
+      component: require("@/components/Taobao/order/waitConfirm")
+    },
+    {
+      path:"/order/waitsend",
+      name:"waitsend",
+      component: require("@/components/Taobao/order/waitSend")
     },
     {
       path:"/test",
@@ -21,9 +36,14 @@ export default new Router({
       component: require("@/components/Taobao/testPost")
     },
     {
-      path:"/cookie",
-      name:"cookie",
-      component: require("@/components/Taobao/CookieList")
+      path:"/userlist",
+      name:"userlist",
+      component: require("@/components/Taobao/userList")
+    },
+    {
+      path:"/config",
+      name:"config",
+      component: require("@/components/Taobao/config")
     },
     {
       path: '*',

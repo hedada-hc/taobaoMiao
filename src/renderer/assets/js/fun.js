@@ -1,4 +1,5 @@
 var superagent = require('superagent');
+var request = require("request");
 import md5 from 'js-md5'
 /**
  * 全局处理函数	
@@ -155,7 +156,7 @@ export default {
 				nick = unescape(decodeURIComponent(cookie[i].value).replace(/\\?\u/g, "%u"));
 			}
 		}
-		return {"nick":nick, "cookie":tmpCookie, "time":new Date().getTime()};
+		return {"nick":nick, "cookie":tmpCookie, "time":new Date().getTime(), "isSelect": false};
 	},
 	testCreateOrder(orderData){
 		var params = JSON.stringify({
@@ -322,5 +323,70 @@ export default {
 			}
 		}
 		return tmp;
+	},
+
+	getUserInfo(cookie,cb){
+		var sign = this.deSign(cookie, '{"pageName":"index"}');
+		var url = `http://api.m.taobao.com/h5/mtop.taobao.mclaren.getmytaobaopage/1.0/?v=1.0&api=mtop.taobao.mclaren.getMyTaobaoPage&appKey=12574478&t=${sign.time}&sign=${sign.sign}&type=jsonp&callback=mtopjsonp1&data=%7B%22pageName%22%3A%22index%22%7D`;
+		request.get({
+			url:url,
+			headers:{
+				"Cookie":cookie
+			}
+		}, (error, response, body)=>{
+			body = body.replace(/mtopjsonp1\(/,"");
+			body = body.replace(/\}\)/,"}");
+			
+			if(JSON.parse(body).data.simpleInfo){
+				cb(null,JSON.parse(body).data.simpleInfo)
+			}else{
+				cb("遇到错误了",null)
+			}
+		})
+	},
+	localCookie(logCookie){
+		var allCookies = this.localQuery("all_cookie") != null ? JSON.parse(this.localQuery("all_cookie")) : [];
+		var cookie = this.LoginCookie(logCookie);
+		//获取该账号信息
+		this.getUserInfo(cookie.cookie, (error, result)=>{
+			if(result){
+				//账号信息赋值到传入cookie
+				cookie.user = result
+				//判断是否是首次登录一个账号
+				if(allCookies.length == 0){
+				 	allCookies.push(cookie)
+				}else{
+					//循环对比是否重复登录的账号 
+					for(var index in allCookies){
+						if(allCookies[index].nick == cookie.nick){
+							allCookies[index].cookie = cookie.cookie;
+							allCookies[index].user = cookie.user;
+							allCookies[index].time = new Date().getTime();
+						}else{
+							allCookies.push(cookie)
+						}
+					}
+				}
+				//保存到local
+				this.localAdd("all_cookie", allCookies);
+			}
+		});
+
+	},
+	getSelectCookie(){
+		var allCookies = this.localQuery("all_cookie") != null ? JSON.parse(this.localQuery("all_cookie")) : [];
+		var cookie = null;
+		if(allCookies.length != 0){
+			for(var index in allCookies){
+				if(allCookies[index].isSelect){
+					cookie = allCookies[index];
+				}
+			}
+		}
+		if(cookie == null && allCookies.length > 0){
+			cookie = allCookies[0];
+		}
+		return cookie;
 	}
+
 }

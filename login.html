@@ -1,0 +1,16 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+    <body>
+        <button id="login">登录成功</button>
+        <webview src="https://login.m.taobao.com/login.htm" style="width:400px; height:600px"></webview>
+
+    </body>
+    <script type="text/javascript">
+        var ipc = require("electron").ipcRenderer;
+        document.getElementById('login').onclick = function(){
+            ipc.send("getCookie")
+        }
+    </script>
+</html>

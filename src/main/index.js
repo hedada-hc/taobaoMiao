@@ -47,16 +47,17 @@ function loginWindow(){
     //frame:false,
     hasShadow:true
   })
-  tbWindow.loadURL(`http://localhost:9080/src/main/login.html`);
+  tbWindow.loadURL("http://localhost:9080/login.html");
   //found-in-page
   //did-get-redirect-request
-  tbWindow.webContents.on("did-get-redirect-request", function(){
+  
+  // tbWindow.webContents.on("did-get-redirect-request", function(){
 
-    session.defaultSession.cookies.get({domain:".taobao.com"}, (error, cookies)=>{
-      mainWindow.webContents.send('loginTB',cookies)
-      tbWindow.close();
-    })
-  })
+  //   session.defaultSession.cookies.get({domain:".taobao.com"}, (error, cookies)=>{
+  //     mainWindow.webContents.send('loginTB',cookies)
+  //     tbWindow.close();
+  //   })
+  // })
 }
 
 app.on('ready', createWindow)
@@ -82,6 +83,17 @@ ipc.on("test", function(){
   session.defaultSession.cookies.get({domain:".taobao.com"}, (error, cookies)=>{
     mainWindow.webContents.send('loginTB',cookies)
 
+  })
+})
+
+ipc.on("getCookie", function(){
+  session.defaultSession.cookies.get({domain:".taobao.com"}, (error, cookies)=>{
+    mainWindow.webContents.send('loginTB',cookies)
+    var ses = tbWindow.webContents.session;
+    ses.clearCache(function(){
+      console.log("clearCache________")
+    });
+    tbWindow.close();
   })
 })
 

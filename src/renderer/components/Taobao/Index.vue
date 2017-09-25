@@ -76,33 +76,34 @@
 			}
 			ipc.on("loginTB",(error, result)=>{
 				if(result){
-					var cookie = this.hezone.LoginCookie(result);
-					if(this.allCookies.length == 0){
-						this.allCookies.push(cookie);
-					}else{
-						for(var i=0;i<this.allCookies.length;i++){
-							if(this.allCookies[i].nick == cookie.nick){
-								this.allCookies[i] = cookie
-							}else{
-								this.allCookies.push(cookie);
-							}
-						}
-					}
-					console.log(this.allCookies);
-					//保存到load
-					this.hezone.localAdd("all_cookie",this.allCookies);
-					this.cookies = cookie.cookie;
+					this.hezone.localCookie(result)
 				}
 			})
 		},
 		methods:{
+			getUserInfo(cookie,cb){
+				var sign = this.hezone.deSign(cookie, '{"pageName":"index"}');
+				var url = `http://api.m.taobao.com/h5/mtop.taobao.mclaren.getmytaobaopage/1.0/?v=1.0&api=mtop.taobao.mclaren.getMyTaobaoPage&appKey=12574478&t=${sign.time}&sign=${sign.sign}&type=jsonp&callback=mtopjsonp1&data=%7B%22pageName%22%3A%22index%22%7D`;
+				request.get({
+					url:url,
+					headers:{
+						"Cookie":cookie
+					}
+				}, (error, response, body)=>{
+					body = body.replace(/mtopjsonp1\(/,"");
+					body = body.replace(/\}\)/,"}");
+					cb(null,JSON.parse(body).data.simpleInfo)
+					console.log(JSON.parse(body))
+				})
+			},
 			webLogin(){
 				ipc.send('loginTB');
 			},
 			testFun(){
 				//this.hezone.handleSKU({"name":"sdsdsd","sku":13345614})
 				//this.test_md5 = md5(this.cookies);
-				this.cookies = this.allCookies[1].cookie;
+				ipc.send("getCookie")
+				//this.cookies = this.allCookies[1].cookie;
 			},
 			selectSku(sku){
 				this.sku = sku
@@ -390,9 +391,10 @@
 </script>
 
 <style type="text/css" lang="scss">
+
 	.login{
 		width: 500px;
-		margin: 0 auto;
+		margin: 82px auto;
 		textarea{
 			width: 300px;
 			height: 200px;

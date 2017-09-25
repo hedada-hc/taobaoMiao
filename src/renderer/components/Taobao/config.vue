@@ -1,9 +1,11 @@
 <template>
+	
 </template>
 
 <script type="text/javascript">
+	
 </script>
 
-<style lang="scss" type="text/css">
+<style type="text/css" lang="scss">
 	
 </style>
