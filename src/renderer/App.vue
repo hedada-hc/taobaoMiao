@@ -68,13 +68,13 @@
 			color: #333333;
 			cursor: pointer;
 			text-decoration: none;
-			background: #ffffff;
-			color: #FF6537;
+			background:#FF6537;
+			color: #ffffff;
 			font-family: sans-serif;
 			box-shadow: 2px 0px 8px #e4e4e4;
 		}
 		.close:hover{
-			background:#FF6537;
+			background:#ff4812;
 			color: #ffffff;
 		}
 		.nav{

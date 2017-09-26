@@ -1,6 +1,7 @@
 var superagent = require('superagent');
 var request = require("request");
 import md5 from 'js-md5'
+import _ from 'lodash'
 /**
  * 全局处理函数	
 */
@@ -133,6 +134,82 @@ export default {
 		tmp_cookie += tmp;
 		console.log(tmp_cookie);
 		return tmp_cookie;
+	},
+	forSku(skuObj){
+		var name = [];
+		var i = [];
+		var v = [];
+		var k = [];
+		var o = [];
+		var value = []
+		var arr = Object.keys(skuObj[0]);
+		switch(arr.length){
+			case 6:
+				name.push(skuObj[0].i_propName)
+				name.push(skuObj[0].v_propName)
+				break;
+			case 8:
+				name.push(skuObj[0].i_propName)
+				name.push(skuObj[0].v_propName)
+				name.push(skuObj[0].k_propName)
+				break;
+			case 10:
+				name.push(skuObj[0].i_propName)
+				name.push(skuObj[0].v_propName)
+				name.push(skuObj[0].k_propName)
+				name.push(skuObj[0].o_propName)
+				break;
+			default:
+				name.push(skuObj[0].i_propName)
+		}
+		for(var item in skuObj){	
+			switch(arr.length){
+				case 6:
+					i.push(skuObj[item].i_name)
+					v.push(skuObj[item].v_name)
+					break;
+				case 8:
+					i.push(skuObj[item].i_name)
+					v.push(skuObj[item].v_name)
+					k.push(skuObj[item].k_name)
+					break;
+				case 10:
+					i.push(skuObj[item].i_name)
+					v.push(skuObj[item].v_name)
+					k.push(skuObj[item].k_name)
+					o.push(skuObj[item].o_name)
+					break;
+				default:
+					i.push(skuObj[0].i_name)
+			}
+		}
+		i = _.uniq(i);
+		v = _.uniq(v);
+		k = _.uniq(k);
+		o = _.uniq(o);
+
+		return {"type":name,"i":i,"v":v,"k":k,"o":o};
+	},
+	goodSkuName(obj){
+		var sku = []
+		var arr = Object.keys(obj[0]);
+		for(var item in obj){	
+			switch(arr.length){
+				case 6:
+					sku.push({"skuName":obj[item].i_name+" "+obj[item].v_name,"sku_key":obj[item].sku_key,"skuId":obj[item].sku})
+					break;
+				case 8:
+					sku.push({"skuName":obj[item].i_name+" "+obj[item].v_name+" "+obj[item].k_name,"sku_key":obj[item].sku_key,"skuId":obj[item].sku})
+					break;
+				case 10:
+					sku.push({"skuName":obj[item].i_name+" "+obj[item].v_name+" "+obj[item].k_name+" "+obj[item].o_name,"sku_key":obj[item].sku_key,"skuId":obj[item].sku})
+					break;
+				default:
+					i.push(obj[0].i_name)
+					sku.push({"skuName":obj[item].i_name,"sku_key":obj[item].sku_key,"skuId":obj[item].sku})
+			}
+		}
+		return sku;
 	},
 	replaceCookie(tmp_cookie,cookie){
 		for(var i=0;i<cookie.length;i++){

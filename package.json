@@ -58,6 +58,8 @@
     "axios": "^0.16.1",
     "crypto": "^1.0.1",
     "js-md5": "^0.6.0",
+    "lodash": "^4.17.4",
+    "moment": "^2.18.1",
     "node-sass": "^4.5.3",
     "request": "^2.82.0",
     "sass-loader": "^6.0.6",

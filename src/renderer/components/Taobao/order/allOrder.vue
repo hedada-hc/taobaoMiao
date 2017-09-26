@@ -78,6 +78,18 @@
 </script>
 
 <style type="text/css" lang="scss">
+	// ::-webkit-scrollbar{  
+	//     width: 16px;  
+	//     height: 16px;  
+	//     background-color: #F5F5F5;  
+	// }  
+
+	// /*定义滑块 内阴影+圆角*/  
+	// ::-webkit-scrollbar-thumb{  
+	// 	border-radius: 10px;  
+	// 	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);  
+	// 	background-color: #555;  
+	// } 
 	table{
 		margin-top:82px;
 		padding: 0px;
