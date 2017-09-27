@@ -137,8 +137,6 @@ export default{
 	getPayInfo(order,info){
 		//获取付款信息
 		console.log(JSON.stringify(order))
-		console.log(order)
-
 		request.get({
 			url:"https:"+order.data.alipayWapCashierUrl,
 			headers:{
@@ -147,57 +145,53 @@ export default{
 		}, (error, response, body) => {
 			if(/server_param&quot;:&quot;([\w]+)&quot;,&quot/.test(body)){
 				var server_param = /server_param&quot;:&quot;([\w]+)&quot;,&quot/.exec(body)[1];
-				var awid = / name="session" value="([\w]+)"\s\/>/.exec(body)[1];
+				var awid = /awid=([\w]+)"\smethod="post">/.exec(body)[1];
+				var session = / name="session" value="([\w]+)"\s\/>/.exec(body)[1];
 				var token = /name="_form_token" value="([\w]+)"\/>/.exec(body)[1];
-
 				info.cookie = fun.hdndleCookie(info.cookie, response.headers['set-cookie']);
-				console.log(info)
-				this.pay({"server_param":server_param, "awid":awid, "token":token,"goods":info,"order":order});
+				this.pay({"server_param":server_param, "awid":awid, "token":token,"goods":info,"order":order,"session":session});
+			}else{
+				console.log(response)
 			}
 		})
 	},
-	pay(info){
+	pay(info,password = "940313"){
 		//验证支付密码
 		var url = `https://mclient.alipay.com/h5/cashierPay.htm?awid=${info.awid}`;
-		var spwd = `${fun.encrypt("1")},${fun.encrypt("8")},${fun.encrypt("3")},${fun.encrypt("8")},${fun.encrypt("4")},${fun.encrypt("4")}`
-		request.post({
-			url:url,
-			headers:{
-				"Referer":"https:"+info.order.data.alipayWapCashierUrl,
-				"Cookie": info.goods.cookie,
-				"User-agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1"
-			},
-			form:{
-				isFromPwdValidate:true,
-				_form_token:info.token,
-				params:`{"server_param":"${info.server_param}","shared_tair":"false"}`,
-				session:info.awid,
-				spwd_unencrypt:"******",
-				spwd:spwd
-			}
-		}, (error, response, body)=>{
-			info.goods.cookie = fun.hdndleCookie(info.goods.cookie, response.headers['set-cookie']);
-			console.log(response,body)
-			this.startPay(info)
-		})
+		var spwd = fun.handlePwd(password);
+		info.token = "7a0e313fb900aa2c9b00603bbf1aaeabd07cc8b516ad4065b7d36c2aebf83f35RZ13"
+		info.server_param = "c2hhcmVkX3RhaXI9ZmFsc2U7Yml6X3R5cGU9dHJhZGU7dHJhZGVfbm89MjAxNzA5MjcyMTAwMTAwMTc1MDIzMTQxOTM4NTt1c2VyX2lkPTIwODgyMjI1Mzc1OTc3NTg7"
+		info.awid = "RZ13NdC892NCTre2hMfgX7TV2j0ghhmobileclientgwRZ13"
+		info.session = "RZ139iHZ1mYM4fVNBgykc5KSQ0s4GYmobilecashierRZ13"
+		var data = `isFromPwdValidate=true&_form_token=${info.token}&params=%7B%22server_param%22%3A%22${info.server_param}%22%2C%22shared_tair%22%3A%22false%22%7D&session=${info.session}&${spwd}`
+		su.post(url)
+			.set("Content-Type","application/x-www-form-urlencoded")
+			.set("Cookie",info.goods.cookie)
+			.set("Referer","https:"+info.order.data.alipayWapCashierUrl)
+			.set("Content-Length",data.length)
+			.set("User-Agent","Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1")
+			.send(data)
+			.end((error, response)=>{
+				console.log(info.goods.cookie,url,data,response.text)
+				info.goods.cookie = fun.hdndleCookie(info.goods.cookie, response.headers['set-cookie']);
+				this.startPay(info);
+			})
 	},
 	startPay(info){
 		var url = `https://mclient.alipay.com/h5/cashierPayResultQuery.json?awid=${info.awid}&r=${Math.floor(Math.random()*1e13)}`;
-		request.post({
-			url:url,
-			headers:{
-				"Cookie":info.goods.cookie,
-				"Referer":`https://mclient.alipay.com/h5/cashierPay.htm?awid=${info.awid}`,
-				"User-agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1"
-			},
-			form:{
-				_input_charset:"utf-8",
-				params:`{"server_param":"${info.server_param}","shared_tair":"false"}`,
-				session:info.awid
-			}
-		},(error, response, body)=>{
-			console.log(response,body)
-		})
+		var data = `_input_charset=utf-8&params=%7B%22server_param%22%3A%22${info.server_param}%22%2C%22shared_tair%22%3A%22false%22%7D&session=${info.session}`
+		console.log(url,data)
+		su.post(url)
+			.set("Cookie",info.goods.cookie)
+			.set("Content-Length",data.length)
+			.set("Referer",`https://mclient.alipay.com/h5/cashierPay.htm?awid=${info.awid}`)
+			.set("User-Agent","Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1")
+			.send(data)
+			.end((error, response)=>{
+				console.log(error, response.text)
+				alert("下单成功并且已付款");
+			})
+
 	},
 	createaddress(cookie,info){
 		//添加收货地址
@@ -207,20 +201,21 @@ export default{
 			.end((error, result)=>{
 				console.log(result)
 			})
+	},
+	isLogin(objCookie, cb){
+		var cookie = objCookie.cookie
+		var sign = fun.deSign(cookie, `{"isSec":"0"}`);
+		var url = `https://acs.m.taobao.com/h5/mtop.user.getusersimple/1.0/?appKey=12574478&t=${sign.time}&sign=${sign.sign}&api=mtop.user.getUserSimple&v=1.0&H5Request=true&type=jsonp&dataType=jsonp&data=%7B%22isSec%22%3A%220%22%7D`
+		request.get({
+			url:url,
+			headers:{
+				"Cookie":cookie
+			}
+		},(error, response, body)=>{
+			if(/FAIL_SYS_SESSION_EXPIRED::SESSION失效/.test(body)){
+				return cb(null,false);
+			}
+			return cb(null,true);;
+		})
 	}
 }
-
-
-
-
-
-
-
-// Referer: https://maliprod.alipay.com/w/trade_pay.do?app_name=tb&partner=PARTNER_TAOBAO_ORDER&biz_type=trade&sign=fkuz_k%252F_m5n_x_m4d2_r%252B_i7_x_o_m_cf_kg_p_ynz_dku_t_ap_e_sqcj_dv_ie_d_vu_z_l50d1_a%253D%253D&trade_no=2017092621001001750228843975&return_url=http%253A%252F%252Fhuodong.m.taobao.com%252Fbuy%252FpaySuccess.html%253FbizOrderId%253D62521651684438233%2526degrade%253D0%2526act%253Dfalse&sign_date=2017-09-26+17%3A38%3A33&extern_token=143af5a91d8eafe8664cd649d1efd4f5&sign_type=DSA
-
-
-// https://buy.m.tmall.com/order/confirmOrderWap.htm?enc=%E2%84%A2&itemId=539323189975&exParams=%7B%22alicom_wtt_cart%22%3A%221%22%2C%22alicom_wtt_param%22%3A%2248359_0_0_0_0_0_1010%4099%4099%22%7D&skuId=3319273236843&service=528822569899%7C0&quantity=1&divisionCode=420111&userId=2848433382&buyNow=true&_input_charset=utf-8&x-itemid=539323189975&x-uid=2848433382
-
-// https://maliprod.alipay.com/w/trade_pay.do?tcode=eyJiaXpPcmRlcklkcyI6IjYyNTgzMzYxNTcyNDM4MjMzIiwiYnV5ZXJJZCI6IjI4NDg0MzMzODIiLCJ0eXBlIjoiMyJ9&alipay_trade_no=2017092621001001750228952151&s_id=143af5a91d8eafe8664cd649d1efd4f5&return_url=https%3A%2F%2Fh5.m.taobao.com%2Fapp%2Ftrade%2Fpaysuc.html%3F_wx_tpl%3Dhttps%3A%2F%2Fowl.alicdn.com%2Fmupp-dy%2Fdevelop%2Ftaobao%2Ftrade%2FpaySuccess%2Fentry.js%26wx_navbar_transparent%3Dtrue%26orderIds%3D62583361572438233%26degrade%3D0%26act%3Dfalse&pay_order_id=62583361572438233
-
-// https://mclient.alipay.com/h5/cashierPay.htm?awid=RZ13GzaCzoe7foCGwEK2tWEP1HQuOdmobileclientgwRZ13

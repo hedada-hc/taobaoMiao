@@ -5,8 +5,9 @@
 				<span>商品链接：</span>
 				<input type="text" v-model="url" v-on:blur="getGoodsInfo" placeholder="请输入商品链接" name="">
 				<span class="xiadan">定时下单：</span>
-				<input type="time" class="dingshi" v-model="time" placeholder="请输入商品链接" name="">
-				<button @click="pay">添加任务</button>
+				<input type="date" class="date" v-model="date" placeholder="请输入时间" name="">
+				<input type="time" class="dingshi" v-model="time" placeholder="请输入时间" name="">
+				<button @click="addOrder">添加任务</button>
 				<button @click="order">直接下单</button>
 				<i></i>
 				<nav >
@@ -31,11 +32,13 @@
 <script type="text/javascript">
 	var shell = require("electron").shell;
 	var moment = require("moment");
+	var schedule = require("node-schedule");
 	export default{
 		data(){
 			return {
-				url:"https://item.taobao.com/item.htm?id=558550775113",
-				time:"11:11",
+				url:"https://item.taobao.com/item.htm?id=535446498716",
+				date:"",
+				time:"",
 				task:[],
 				cookie:{},
 				goodInfo:{},
@@ -48,26 +51,31 @@
 		},
 		created(){
 			this.cookie = this.hezone.getSelectCookie();
+			console.log(schedule)
 		},
 		methods:{
 			open(itemID){
 				shell.openExternal('https://item.taobao.com/item.htm?id=' + itemID);
 			},
 			addOrder(){
+				var duleTime = this.hezone.scheduleTime(this.date+"-"+this.time);
 				if(this.time == null) return alert("请输入时间");
 				var time = this.getTime(this.time);
 				console.log(moment(time).fromNow("h:mm:ss"))
 				this.good.getGoodsInfo(this.url,(error, response)=>{
 					console.log(response)
-					if(response != null){
+					if(response != null && this.type != ""){
 						this.goodInfo = response
 						this.task.push({"url":this.url,"img":response.picsPath[0],"title":response.title,"user":"小小的太阳1161","price":response.price,"time":time,"skuName":this.type})
+						schedule.scheduleJob(duleTime,()=>{
+							this.order();
+						})
 					}else{
 						alert("该商品有误")
 					}
 					
 				});
-				
+
 			},
 			getTime(time){
 				var timeObj = time.split(":");
@@ -82,11 +90,15 @@
 				this.good.subOrder(this.cookie.cookie,this.goodInfo.itemid,this.goodInfo.userId,this.skuId, (error, response)=>{
 					this.realPay = response
 					console.log(error,response)
+					if(this.realPay){
+						this.pay();
+					}else{
+						console.log(response,44111111)
+					}
+					
 				});
 			},
 			pay(){
-				this.realPay = {"api":"mtop.trade.createorder.h5","data":{"alipayOrderId":"2017092621001001750229254475","alipayWapCashierUrl":"//maliprod.alipay.com/w/trade_pay.do?tcode=eyJiaXpPcmRlcklkcyI6IjYyNTkwNDE5MjM5NDM4MjMzIiwiYnV5ZXJJZCI6IjI4NDg0MzMzODIiLCJ0eXBlIjoiMyJ9&alipay_trade_no=2017092621001001750229254475&s_id=16a01edf8a46c12cf125eaada8cdfe34&return_url=https%3A%2F%2Fh5.m.taobao.com%2Fapp%2Ftrade%2Fpaysuc.html%3F_wx_tpl%3Dhttps%3A%2F%2Fowl.alicdn.com%2Fmupp-dy%2Fdevelop%2Ftaobao%2Ftrade%2FpaySuccess%2Fentry.js%26wx_navbar_transparent%3Dtrue%26orderIds%3D62590419239438233%26degrade%3D0%26act%3Dfalse&pay_order_id=62590419239438233","backUrl":"//h5.m.taobao.com/app/trade/paysuc.html?_wx_tpl=https://owl.alicdn.com/mupp-dy/develop/taobao/trade/paySuccess/entry.js&wx_navbar_transparent=true&orderIds=62590419239438233&degrade=0&act=false","bizOrderId":"62590419239438233","buyerNumId":2848433382,"nextUrl":"//maliprod.alipay.com/w/trade_pay.do?tcode=eyJiaXpPcmRlcklkcyI6IjYyNTkwNDE5MjM5NDM4MjMzIiwiYnV5ZXJJZCI6IjI4NDg0MzMzODIiLCJ0eXBlIjoiMyJ9&alipay_trade_no=2017092621001001750229254475&s_id=16a01edf8a46c12cf125eaada8cdfe34&return_url=https%3A%2F%2Fh5.m.taobao.com%2Fapp%2Ftrade%2Fpaysuc.html%3F_wx_tpl%3Dhttps%3A%2F%2Fowl.alicdn.com%2Fmupp-dy%2Fdevelop%2Ftaobao%2Ftrade%2FpaySuccess%2Fentry.js%26wx_navbar_transparent%3Dtrue%26orderIds%3D62590419239438233%26degrade%3D0%26act%3Dfalse&pay_order_id=62590419239438233","partSuccess":false,"resultType":0,"secrityPay":true,"signStr":"service=\"mobile.securitypay.pay\"&_input_charset=\"utf-8\"&app_name=\"tb\"&appenv=\"appid=taobao^system=^version=\"&partner=\"PARTNER_TAOBAO_ORDER\"&biz_type=\"trade\"&trade_no=\"2017092621001001750229254475\"&sign_date=\"2017-09-26 17:56:08\"&extern_token=\"16a01edf8a46c12cf125eaada8cdfe34\"&sign=\"_r%2Bf_fih_q_g0_m_h_z_j_euj7kpb_lp_o_h_i_f_s_k_mqu_ax_z9ng_j50_oax_v_c_g_i%2Fe_p5_a_k_q%3D%3D\"&sign_type=\"DSA\"","simplePay":true,"useSimplePayForH5":false},"ret":["SUCCESS::调用成功"],"v":"3.0"};
-				console.log(this.realPay)
 				this.good.getPayInfo(this.realPay,this.cookie);
 			},
 			getGoodsInfo(){
@@ -116,6 +128,9 @@
 </script>
 
 <style type="text/css" lang="scss">
+	input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{
+		-webkit-appearance: none !important;
+	}
 	.order{
 		width: 1000px;
 		margin:100px auto;
@@ -139,8 +154,11 @@
 					font-size: 12px;
 					text-align: center;
 				}
+				.date{
+					width: 105px;
+				}
 				.dingshi{
-					width: 150px;
+					width: 80px;
 				}
 				span:nth-child(1){
 					margin-left: 0px;
@@ -266,3 +284,4 @@
 		}
 	}
 </style>
+

@@ -464,6 +464,25 @@ export default {
 			cookie = allCookies[0];
 		}
 		return cookie;
+	},
+	handlePwd(pwdStr){
+		var arr = pwdStr.split("");
+		var enpwd = ""
+		var v = ""
+		for(var index in arr){
+			var encryptPwd = this.encrypt(arr[index]);
+			enpwd += encodeURIComponent(encryptPwd) + "%2c"
+			v += "*"
+		}
+		enpwd = enpwd.substr(0,enpwd.length-3);
+		return `spwd_unencrypt=${v}&spwd=${enpwd}`
+	},
+	scheduleTime(strTime){
+		//2017-09-27 18:00
+		var yer = strTime.split("-");
+		var fen = yer[3].split(":");
+		var date = new Date(parseInt(yer[0]),parseInt(yer[1])-1,parseInt(yer[2]),parseInt(fen[0]),parseInt(fen[1]),0);
+		return date
 	}
 
 }

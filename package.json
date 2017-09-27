@@ -61,6 +61,7 @@
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "node-sass": "^4.5.3",
+    "node-schedule": "^1.2.5",
     "request": "^2.82.0",
     "sass-loader": "^6.0.6",
     "sqlite3": "^3.1.11",
