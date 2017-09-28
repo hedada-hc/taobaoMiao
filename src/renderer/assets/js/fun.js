@@ -224,16 +224,17 @@ export default {
 		console.log(tmp_cookie);
 		return tmp_cookie;
 	},
-	LoginCookie(cookie){
+	LoginCookie(obj){
 		var tmpCookie = '';
 		var nick = "";
+		var cookie = obj.cookie
 		for(var i=0;i<cookie.length;i++){
 			tmpCookie += `${cookie[i].name}=${cookie[i].value}; `
 			if(cookie[i].name == "tracknick"){
 				nick = unescape(decodeURIComponent(cookie[i].value).replace(/\\?\u/g, "%u"));
 			}
 		}
-		return {"nick":nick, "cookie":tmpCookie, "time":new Date().getTime(), "isSelect": false};
+		return {"nick":nick, "cookie":tmpCookie, "time":new Date().getTime(), "isLogin":true ,"isSelect": false, "pwd":obj.pwd};
 	},
 	testCreateOrder(orderData){
 		var params = JSON.stringify({
@@ -424,6 +425,7 @@ export default {
 	localCookie(logCookie){
 		var allCookies = this.localQuery("all_cookie") != null ? JSON.parse(this.localQuery("all_cookie")) : [];
 		var cookie = this.LoginCookie(logCookie);
+		console.log(cookie)
 		//获取该账号信息
 		this.getUserInfo(cookie.cookie, (error, result)=>{
 			if(result){
@@ -478,7 +480,6 @@ export default {
 		return `spwd_unencrypt=${v}&spwd=${enpwd}`
 	},
 	scheduleTime(strTime){
-		//2017-09-27 18:00
 		var yer = strTime.split("-");
 		var fen = yer[3].split(":");
 		var date = new Date(parseInt(yer[0]),parseInt(yer[1])-1,parseInt(yer[2]),parseInt(fen[0]),parseInt(fen[1]),0);

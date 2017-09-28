@@ -12,7 +12,7 @@
   				<a href="/#order/waitconfirm">待收货</a>
   			</li>
   			<li><a href="/#userlist">账号列表</a></li>
-  			<li><a href="/#config">软件配置</a></li>
+  			<!-- <li><a href="/#config">软件配置</a></li> -->
   		</ul>
 
   	</div>

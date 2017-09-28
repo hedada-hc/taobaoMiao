@@ -19,7 +19,8 @@
 			<li v-for="item in task">
 				<i></i>
 				<img :src="item.img">
-				<a href="javascript:;" @click="open(556223312007)">{{item.title}}</a>
+				<a href="javascript:;" @click="open(item.url)">{{item.title}}</a>
+				<dd @click="deleteDule(item)">X</dd>
 				<span class="time">倒计时: <span>{{item.time}}</span></span>
 				<span class="price">价格: <span>{{item.price}}</span></span>
 				<span class="user">账号: <span>{{item.user}}</span></span>
@@ -30,16 +31,17 @@
 </template>
 
 <script type="text/javascript">
+	import jquery from 'jquery'
 	var shell = require("electron").shell;
 	var moment = require("moment");
 	var schedule = require("node-schedule");
 	export default{
 		data(){
 			return {
-				url:"https://item.taobao.com/item.htm?id=535446498716",
+				url:"",
 				date:"",
 				time:"",
-				task:[],
+				task:null,
 				cookie:{},
 				goodInfo:{},
 				skuLen:0,
@@ -51,25 +53,22 @@
 		},
 		created(){
 			this.cookie = this.hezone.getSelectCookie();
-			console.log(schedule)
+			this.task = this.hezone.localQuery("dulesList") != null ? JSON.parse(this.hezone.localQuery("dulesList")) : [];
+			this.createDuleTask();
 		},
 		methods:{
 			open(itemID){
-				shell.openExternal('https://item.taobao.com/item.htm?id=' + itemID);
+				/[a-z]/.test(itemID) ? shell.openExternal(itemID) : shell.openExternal('https://item.taobao.com/item.htm?id=' + itemID);
 			},
 			addOrder(){
+				if(this.time == "" || this.date == "") return alert("请输入时间");
 				var duleTime = this.hezone.scheduleTime(this.date+"-"+this.time);
-				if(this.time == null) return alert("请输入时间");
 				var time = this.getTime(this.time);
-				console.log(moment(time).fromNow("h:mm:ss"))
 				this.good.getGoodsInfo(this.url,(error, response)=>{
 					console.log(response)
 					if(response != null && this.type != ""){
 						this.goodInfo = response
-						this.task.push({"url":this.url,"img":response.picsPath[0],"title":response.title,"user":"小小的太阳1161","price":response.price,"time":time,"skuName":this.type})
-						schedule.scheduleJob(duleTime,()=>{
-							this.order();
-						})
+						this.saveDule({"url":this.url,"img":response.picsPath[0],"title":response.title,"user":this.cookie.nick,"price":response.price,"time":time,"duleTime":duleTime,"skuName":this.type});
 					}else{
 						alert("该商品有误")
 					}
@@ -86,7 +85,7 @@
 				return ol_time - now_time;
 			},
 			order(){
-				if(this.skuId == 0) return alert("请选择sku");
+				if(this.skuId) return alert("请选择sku");
 				this.good.subOrder(this.cookie.cookie,this.goodInfo.itemid,this.goodInfo.userId,this.skuId, (error, response)=>{
 					this.realPay = response
 					console.log(error,response)
@@ -105,15 +104,21 @@
 				if(this.url != ""){
 					this.good.getGoodsInfo(this.url,(error, response)=>{
 						this.goodInfo = response
-						this.skuLen = this.hezone.goodSkuName(response.sku);
+						
+						if(response.sku){
+							this.skuLen = this.hezone.goodSkuName(response.sku)
+						}else{
+							this.skuLen = [{"skuId":"0","skuName":"无选项默认选项","sku_key":0}];
+						}
+						//selectSku
+						//this.skuLen = this.hezone.goodSkuName(response.sku);
 						console.log(this.skuLen)
-						this.queryCoupon();
+						//this.queryCoupon();
 					})
 				}
 			},
 			selectSku(e,skuId,skuName){
 				console.log(skuName)
-				//this.selectClass = true;
 				this.skuId = skuId;
 				e.target.className = e.target.className == "selectSku" ? "" : "selectSku"
 				this.type = skuName;
@@ -122,11 +127,34 @@
 				this.good.queryCoupon(this.cookie.cookie,this.goodInfo.itemid, (error, response)=>{
 					console.log(response)
 				});
+			},
+			saveDule(dule){
+				this.task.push(dule);
+				//保存定时任务
+				this.hezone.localAdd("dulesList",JSON.stringify(this.task));
+				this.createDuleTask();
+			},
+			createDuleTask(){
+				for(var index in this.task){
+					var j = schedule.scheduleJob(this.task[index].duleTime,()=>{
+						this.order();
+					})
+					this.task[index].node_schedule = j
+				}
+
+			},
+			deleteDule(index){
+				try{
+					index.node_schedule.cancel(); //关闭定时任务
+				}catch(e){
+					
+				}
+				this.task.splice(index,1);
+				this.hezone.localAdd("dulesList",JSON.stringify(this.task));
 			}
 		}
 	}
 </script>
-
 <style type="text/css" lang="scss">
 	input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{
 		-webkit-appearance: none !important;
@@ -146,7 +174,7 @@
 				input{
 					outline: none;
 					border:none;
-					width: 350px;
+					width: 310px;
 					height: 30px;
 					border-radius:35px;
 					box-shadow: 0px 0px 14px #eaeaea;
@@ -220,6 +248,22 @@
 				width: 490px;
 				height: 75px;
 				box-shadow: 0px 0px 14px #d2d2d2;
+				dd{
+					display: block;
+					float: right;
+					width: 20px;
+					height: 20px;
+					font-family: sans-serif;
+					color: #ff4f3d;
+					text-align: center;
+					line-height: 20px;
+					font-size: 11px;
+					cursor: pointer;
+				}
+				dd:hover{
+					background:#ff4f3d;
+					color: #ffffff;
+				}
 				i{
 					float: left;
 					display: inline-block;

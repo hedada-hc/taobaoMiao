@@ -155,14 +155,10 @@ export default{
 			}
 		})
 	},
-	pay(info,password = "940313"){
+	pay(info){
 		//验证支付密码
 		var url = `https://mclient.alipay.com/h5/cashierPay.htm?awid=${info.awid}`;
-		var spwd = fun.handlePwd(password);
-		info.token = "7a0e313fb900aa2c9b00603bbf1aaeabd07cc8b516ad4065b7d36c2aebf83f35RZ13"
-		info.server_param = "c2hhcmVkX3RhaXI9ZmFsc2U7Yml6X3R5cGU9dHJhZGU7dHJhZGVfbm89MjAxNzA5MjcyMTAwMTAwMTc1MDIzMTQxOTM4NTt1c2VyX2lkPTIwODgyMjI1Mzc1OTc3NTg7"
-		info.awid = "RZ13NdC892NCTre2hMfgX7TV2j0ghhmobileclientgwRZ13"
-		info.session = "RZ139iHZ1mYM4fVNBgykc5KSQ0s4GYmobilecashierRZ13"
+		var spwd = fun.handlePwd(info.pwd);
 		var data = `isFromPwdValidate=true&_form_token=${info.token}&params=%7B%22server_param%22%3A%22${info.server_param}%22%2C%22shared_tair%22%3A%22false%22%7D&session=${info.session}&${spwd}`
 		su.post(url)
 			.set("Content-Type","application/x-www-form-urlencoded")

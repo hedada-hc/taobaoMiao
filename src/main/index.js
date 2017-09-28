@@ -86,9 +86,10 @@ ipc.on("test", function(){
   })
 })
 
-ipc.on("getCookie", function(){
+ipc.on("getCookie", function(err,res){
+  
   session.defaultSession.cookies.get({domain:".taobao.com"}, (error, cookies)=>{
-    mainWindow.webContents.send('loginTB',cookies)
+    mainWindow.webContents.send('loginTB',{"cookie":cookies,"pwd":res})
     var ses = tbWindow.webContents.session;
     ses.clearCache(function(){
       console.log("clearCache________")

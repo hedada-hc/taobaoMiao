@@ -1,16 +1,62 @@
-
 <!DOCTYPE html>
 <html>
-    <head>
-    <body>
-        <button id="login">登录成功</button>
-        <webview src="https://login.m.taobao.com/login.htm" style="width:400px; height:600px"></webview>
-
-    </body>
-    <script type="text/javascript">
-        var ipc = require("electron").ipcRenderer;
-        document.getElementById('login').onclick = function(){
-            ipc.send("getCookie")
+<head>
+    <style type="text/css">
+        #login{
+            outline: none;
+            border:none;
+            width: 100px;
+            height: 25px;
+            color: #ffffff;
+            background: -webkit-linear-gradient(left,#ff9000,#ff5000) no-repeat;
+            border-radius:35px;
+            cursor: pointer;
+            margin: 20px;
+            float: left;
         }
-    </script>
+        #pwd{
+            font-size: inherit;
+            width: 200px;
+            height: 25px;
+            margin-top:16px;
+            outline: none;
+            border: 0;
+            color: #333;
+            border-bottom: 1px solid #ff5000;
+            float: left;
+            margin-left: 16px;
+        }
+        i{
+            display: block;
+            width: 100%;
+            float: left;
+            border-bottom: 1px solid #efefef;
+        }
+        .info{
+            display: block;
+            font-size: 13px;
+            color: #999999;
+            text-align: center;
+            line-height: 25px;
+        }
+    </style>
+</head>
+<body>
+    <span class="info">登录完成以后请填写"支付密码"然后点击"已完成登录"</span>
+    <input type="password" name="" id="pwd" placeholder="请输入支付密码">
+    <button id="login">已完成登录</button>
+    <i></i>
+    <webview src="https://login.m.taobao.com/login.htm" style="width:400px; height:600px"></webview>
+</body>
+<script type="text/javascript">
+    var ipc = require("electron").ipcRenderer;
+    document.getElementById('login').onclick = function(){
+        var pwd = document.getElementById("pwd").value;
+        if(pwd.length >= 6){
+            ipc.send("getCookie",pwd);
+        }else{
+            alert("请填写支付密码,或支付填写正确的6位数支付密码");
+        }
+    }
+</script>
 </html>
