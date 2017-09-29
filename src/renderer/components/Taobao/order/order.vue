@@ -21,7 +21,7 @@
 				<img :src="item.img">
 				<a href="javascript:;" @click="open(item.url)">{{item.title}}</a>
 				<dd @click="deleteDule(item)">X</dd>
-				<span class="time">倒计时: <span>{{item.time}}</span></span>
+				<span class="time">倒计时: <span>{{item.time}} {{m}}</span></span>
 				<span class="price">价格: <span>{{item.price}}</span></span>
 				<span class="user">账号: <span>{{item.user}}</span></span>
 				<span class="miaos">秒杀型号: <span>{{item.skuName}}</span></span>
@@ -38,23 +38,25 @@
 	export default{
 		data(){
 			return {
-				url:"",
+				url:"https://detail.tmall.com/item.htm?id=557231374753",
 				date:"",
 				time:"",
-				task:null,
+				task:[],
 				cookie:{},
 				goodInfo:{},
 				skuLen:0,
 				selectClass:false,
 				skuId:0,
 				realPay:{},
-				type:""
+				type:"",
+				m:"秒"
 			}
 		},
 		created(){
 			this.cookie = this.hezone.getSelectCookie();
 			this.task = this.hezone.localQuery("dulesList") != null ? JSON.parse(this.hezone.localQuery("dulesList")) : [];
 			this.createDuleTask();
+			this.countTime();
 		},
 		methods:{
 			open(itemID){
@@ -63,12 +65,14 @@
 			addOrder(){
 				if(this.time == "" || this.date == "") return alert("请输入时间");
 				var duleTime = this.hezone.scheduleTime(this.date+"-"+this.time);
-				var time = this.getTime(this.time);
+				var time = this.getTime(duleTime);
+				if(time == 0) return
 				this.good.getGoodsInfo(this.url,(error, response)=>{
 					console.log(response)
 					if(response != null && this.type != ""){
 						this.goodInfo = response
-						this.saveDule({"url":this.url,"img":response.picsPath[0],"title":response.title,"user":this.cookie.nick,"price":response.price,"time":time,"duleTime":duleTime,"skuName":this.type});
+						this.saveDule({"url":this.url,"img":response.picsPath[0],"title":response.title,"user":"dssdsdsd","price":response.price,"time":time,"duleTime":duleTime,"skuName":this.type});
+						// this.saveDule({"url":this.url,"img":response.picsPath[0],"title":response.title,"user":this.cookie.nick,"price":response.price,"time":time,"duleTime":duleTime,"skuName":this.type});
 					}else{
 						alert("该商品有误")
 					}
@@ -76,16 +80,19 @@
 				});
 
 			},
-			getTime(time){
-				var timeObj = time.split(":");
-				var s = parseInt(timeObj[0]) * (1000 * 60 * 60) //小时转时间戳
-				var f = parseInt(timeObj[1]) * (1000 * 60) //分钟转时间戳
-				var now_time = new Date().getTime();
-				var ol_time = now_time + s + f;
-				return ol_time - now_time;
+			getTime(DuleTime){
+				
+				DuleTime = (DuleTime.getTime() / 1000).toString().split(".")[0];
+				var now = (new Date().getTime() / 1000).toString().split(".")[0];
+				if(DuleTime < now){
+					alert("定时时间必须大于当前时间，如果需要立马下单可以点击立即下单");
+					return 0;
+				}
+				return DuleTime,now,DuleTime - now;
 			},
 			order(){
-				console.log(this.skuId)
+				// this.good.getGoodsInfo2(this.url);
+				// return
 				if(this.skuId.length<=0) return alert("请选择sku");
 				this.good.subOrder(this.cookie.cookie,this.goodInfo.itemid,this.goodInfo.userId,this.skuId, (error, response)=>{
 					this.realPay = response
@@ -131,6 +138,10 @@
 			},
 			saveDule(dule){
 				this.task.push(dule);
+				
+				this.skuLen = []
+				this.url = ""
+				return
 				//保存定时任务
 				this.hezone.localAdd("dulesList",JSON.stringify(this.task));
 				this.createDuleTask();
@@ -152,6 +163,28 @@
 				}
 				this.task.splice(index,1);
 				this.hezone.localAdd("dulesList",JSON.stringify(this.task));
+			},
+			countTime(){
+				var rule = new schedule.RecurrenceRule();
+				var times = [];
+			　　for(var i=1; i<60; i++){
+			　　　　times.push(i);
+			　　}
+				rule.second = times;
+				
+				schedule.scheduleJob(rule, ()=>{	
+					if(this.task.length > 0){
+				      　for(var index in this.task){
+							if(this.task[index].time == 0 || !/[\d]/.test(this.task[index].time)){
+								this.task[index].time = '时间到秒杀'
+								this.m = ""
+							}else{
+								console.log(this.task[index].time)
+								this.task[index].time -= 1 
+							}
+						}
+					}
+			　　});
 			}
 		}
 	}

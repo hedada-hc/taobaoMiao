@@ -1,5 +1,6 @@
 <template>
 	<div class="user">
+		<button @click="test" class="login">登录账号</button>
 		<h3 v-if="isLogin" class="info">当前共有 <span>{{allCookie.length}}</span> 个账号，过期 <span>{{isCount}}</span> 个</h3>
 		<h3 v-else class="info" @click="login">请先登录啊，点我登录</h3>
 		<ul>
@@ -11,7 +12,7 @@
 					<span class="orderinfo">待付款:<p> {{item.user.order2Pay}}</p></span>
 					<span class="orderinfo">待发货:<p> {{item.user.order2Deliver}}</p></span>
 					<span class="orderinfo">待收货:<p> {{item.user.order2Receive}}</p></span>
-					<!-- <button @click="test" class="login">登录账号</button> -->
+					<button @click="test" class="login">登录账号</button>
 					<span class="time">上次登录时间: {{formatDateTime(item.time)}}</span>
 				</div>
 			</li>
@@ -44,19 +45,24 @@
 				if(this.hezone.localQuery("all_cookie") != null){
 					this.allCookie = JSON.parse(this.hezone.localQuery("all_cookie"))
 					for(var item in this.allCookie){
+						//检测账号是否失效
 						this.good.isLogin(this.allCookie[item],(error, res)=>{
-							console.log(res)
+							if(!res){
+								this.isCount += 1
+							}
 						});
 					}
 					this.isLogin = true;
-					//检测账号是否失效
-					this.isLoginFun();
+					
 				}else{
 					this.isLogin = false;
 				}
 			},
 			login(){
 				ipc.send("loginTB");
+			},
+			test(){
+				ipc.send("cSession");
 			},
 			formatDateTime(inputTime) {    
 			    var date = new Date(inputTime);  
@@ -82,17 +88,6 @@
 					}
 				}
 				this.hezone.localAdd("all_cookie", this.allCookie);
-			},
-			isLoginFun(){
-				//检测账号是否过期
-				console.log(allCookie)
-				for(var index in allCookie){
-					this.good.isLogin(allCookie[index],(error,res)=>{
-						if(res){
-							this.isCount += 1
-						}
-					});
-				}
 			}
 		}
 	}

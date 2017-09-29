@@ -104,6 +104,22 @@ ipc.on("close", function(){
   app.quit();
   //mainWindow.close();
 })
+
+
+//清空session测试
+ipc.on("cSession",()=>{
+  var ses = tbWindow.webContents.session;
+  session.defaultSession.cookies.get({},(error,cookie)=>{
+    
+    session.defaultSession.cookies.remove(".taobao.com","lgc",(err,res)=>{
+      console.log(err,res)
+      session.defaultSession.cookies.get({},(e,c)=>{
+        console.log(e,c)
+      })
+    })
+  })
+  console.log(new Date())
+})
 /**
  * Auto Updater
  *

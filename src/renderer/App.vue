@@ -1,7 +1,7 @@
 <template>
   <div id="app">
   	<a href="javascript:;" class="close" @click="close()">X</a>
-  	<div class="border"  style="-webkit-app-region: drag;">淘宝秒杀下单系统</div>
+  	<div class="border"  style="-webkit-app-region: drag;">兄弟辅助</div>
   	<div class="nav">
   		<ul>
   			<li> <router-link to="/">下单任务列表</router-link></li>

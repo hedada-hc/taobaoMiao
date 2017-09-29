@@ -1,8 +1,10 @@
 /**
  * 全局网络请求函数
 */
+var char = require("superagent-charset");
 var request = require("request");
-var su = require("superagent");
+var su = char(require("superagent"));
+var iconv = require('iconv-lite');
 import md5 from 'js-md5'
 import fun from './fun.js'
 export default{
@@ -36,27 +38,55 @@ export default{
 					if(/调用成功/.test(result.text)){
 						var goods = JSON.parse(result.text)
 						//console.log(goods)
-						var apiStack = JSON.parse(goods.data.apiStack[0].value);
-						goodInfo.quantity = apiStack.data.itemInfoModel.quantity
-						goodInfo.total = apiStack.data.itemInfoModel.totalSoldQuantity
-						goodInfo.price = /-/.test(apiStack.data.itemInfoModel.priceUnits[0].price) ? apiStack.data.itemInfoModel.priceUnits[0].price.split("-")[0] : apiStack.data.itemInfoModel.priceUnits[0].price
-						goodInfo.title = goods.data.itemInfoModel.title
-						goodInfo.picsPath = goods.data.itemInfoModel.picsPath
-						goodInfo.userId = goods.data.layoutData.replaceDataMap.SELLER_ID
-						goodInfo.nick = goods.data.seller.nick
-						goodInfo.itemid = this.getItemID(itemId)
-						if(goods.data.skuModel.skuProps){
-							goodInfo.skuModel = goods.data.skuModel
-							goodInfo.sku = fun.handleSKU(goodInfo.skuModel);
-						}else{
-							goodInfo.sku = 0
+						try{
+							var apiStack = JSON.parse(goods.data.apiStack[0].value);
+							goodInfo.quantity = apiStack.data.itemInfoModel.quantity
+							goodInfo.total = apiStack.data.itemInfoModel.totalSoldQuantity
+							goodInfo.price = /-/.test(apiStack.data.itemInfoModel.priceUnits[0].price) ? apiStack.data.itemInfoModel.priceUnits[0].price.split("-")[0] : apiStack.data.itemInfoModel.priceUnits[0].price
+							goodInfo.title = goods.data.itemInfoModel.title
+							goodInfo.picsPath = goods.data.itemInfoModel.picsPath
+							goodInfo.userId = goods.data.layoutData.replaceDataMap.SELLER_ID
+							goodInfo.nick = goods.data.seller.nick
+							goodInfo.itemid = this.getItemID(itemId)
+							if(goods.data.skuModel.skuProps){
+								goodInfo.skuModel = goods.data.skuModel
+								goodInfo.sku = fun.handleSKU(goodInfo.skuModel);
+							}else{
+								goodInfo.sku = 0
+							}
+							cb(null, goodInfo);
+							return
+						}catch(e){
+							alert("请重新获取一次")
 						}
-						cb(null, goodInfo);
-						return
+					}else{
+						alert("请重新获取一次")
 					}
 				}
 				cb(error,null);
 			})
+	},
+	getGoodsInfo2(itemId){
+		var goodInfo = {};
+		var itemid = this.getItemID(itemId);
+		var time = new Date().getTime().toString().substr(0,10);
+		var url = `https://mdskip.taobao.com/core/initItemDetail.htm?showShopProm=false&sellerPreview=false&itemId=${itemid}&isApparel=false&queryMemberRight=true&isPurchaseMallPage=false&isRegionLevel=false&service3C=false&tmallBuySupport=true&addressLevel=2&cartEnable=true&tryBeforeBuy=false&isUseInventoryCenter=false&isAreaSell=false&isSecKill=false&cachedTimestamp=${time}&offlineShop=false&isForbidBuyItem=false&household=false&timestamp=${time}`
+		url = `https://detail.tmall.com/item.htm?id=${itemid}`;
+		su.get(url)
+			.set("User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.86 Safari/537.36")
+			.end((error, response)=>{
+				
+				var data = /TShop\.Setup\([\s]+\{(.*?)[\s]+\);/.exec(response.text);
+				console.log(error,response)
+			})
+		// request.get({url:url,headers:{"Referer":}},(error,response,body)=>{
+		// 	body = iconv.decode(body, 'GBK');
+		// 	body = body.replace(/setMdskip\(/,"")
+		// 	body = body.replace(/\}\)/,"}")
+		// 	console.log(JSON.parse(body))
+			
+		// 	//if(//)
+		// })
 	},
 	subOrder(cookie, itemid, userId, sku = null,cb){
 
