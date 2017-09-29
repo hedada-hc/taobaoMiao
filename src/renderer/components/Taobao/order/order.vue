@@ -85,7 +85,8 @@
 				return ol_time - now_time;
 			},
 			order(){
-				if(this.skuId) return alert("请选择sku");
+				console.log(this.skuId)
+				if(this.skuId.length<=0) return alert("请选择sku");
 				this.good.subOrder(this.cookie.cookie,this.goodInfo.itemid,this.goodInfo.userId,this.skuId, (error, response)=>{
 					this.realPay = response
 					console.log(error,response)

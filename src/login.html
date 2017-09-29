@@ -40,6 +40,9 @@
             line-height: 25px;
         }
     </style>
+    <script>
+    require('module').globalPaths.push('<%= htmlWebpackPlugin.options.nodeModules.replace(/\\/g, '\\\\') %>')
+  </script>
 </head>
 <body>
     <span class="info">登录完成以后请填写"支付密码"然后点击"已完成登录"</span>
@@ -49,6 +52,7 @@
     <webview src="https://login.m.taobao.com/login.htm" style="width:400px; height:600px"></webview>
 </body>
 <script type="text/javascript">
+     if (process.env.NODE_ENV !== 'development') window.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
     var ipc = require("electron").ipcRenderer;
     document.getElementById('login').onclick = function(){
         var pwd = document.getElementById("pwd").value;

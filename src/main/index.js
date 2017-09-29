@@ -47,7 +47,8 @@ function loginWindow(){
     //frame:false,
     hasShadow:true
   })
-  tbWindow.loadURL("http://localhost:9080/login.html");
+  tbWindow.loadURL(`file://${__dirname}/login.html`);
+  // tbWindow.webContents.openDevTools();
   //found-in-page
   //did-get-redirect-request
   

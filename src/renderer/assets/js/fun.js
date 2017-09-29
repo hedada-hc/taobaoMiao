@@ -310,6 +310,7 @@ export default {
 			"linkage":{}
 		}
 		//params.hierarchy.structure = orderData.data.hierarchy.structure
+		console.log(orderData)
 		params.hierarchy = {"structure":orderData.data.hierarchy.structure}
 		var unData = this.un(orderData.data.linkage.request, orderData.data.linkage.input)
 		params.data.anonymous_1 = orderData.data.data.anonymous_1
@@ -468,6 +469,7 @@ export default {
 		return cookie;
 	},
 	handlePwd(pwdStr){
+		console.log(pwdStr,472)
 		var arr = pwdStr.split("");
 		var enpwd = ""
 		var v = ""

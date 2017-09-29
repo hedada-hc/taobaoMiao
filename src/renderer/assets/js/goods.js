@@ -114,6 +114,7 @@ export default{
 	},
 	createOrder(info,realPay,cb){
 		//创建订单下单
+		console.log(realPay)
 		var data = fun.testCreateOrder(realPay);
 		var sign = fun.deSign(info.cookie, data)
 		var url = `https://h5acs.m.tmall.com/h5/mtop.trade.createorder.h5/3.0/?jsv=2.4.2&appKey=12574478&t=${sign.time}&sign=${sign.sign}&api=mtop.trade.createOrder.h5&v=3.0&type=originaljson&timeout=20000&dataType=json&isSec=1&ecode=1&ttid=%23b%23ip%23%23_h5&AntiFlood=true&LoginRequest=true&H5Request=true&submitref=0a67f6&x-itemid=${info.itemid}&x-uid=${info['x-uid']}`
@@ -158,7 +159,7 @@ export default{
 	pay(info){
 		//验证支付密码
 		var url = `https://mclient.alipay.com/h5/cashierPay.htm?awid=${info.awid}`;
-		var spwd = fun.handlePwd(info.pwd);
+		var spwd = fun.handlePwd(info.goods.pwd);
 		var data = `isFromPwdValidate=true&_form_token=${info.token}&params=%7B%22server_param%22%3A%22${info.server_param}%22%2C%22shared_tair%22%3A%22false%22%7D&session=${info.session}&${spwd}`
 		su.post(url)
 			.set("Content-Type","application/x-www-form-urlencoded")
@@ -212,6 +213,21 @@ export default{
 				return cb(null,false);
 			}
 			return cb(null,true);;
+		})
+	},
+	getLogisticByOrderId(info, cb){
+		//获取订单物流信息
+		var sign = fun.deSign(info.cookie, `{"orderId":"${info.mainOrderId}"}`);
+		var url = `https://api.m.taobao.com/h5/mtop.logistic.getlogisticbyorderid/1.0/?v=1.0&api=mtop.logistic.getLogisticByOrderId&appKey=12574478&t=${sign.time}&type=jsonp&sign=${sign.sign}&data=%7B%22orderId%22%3A%22${info.mainOrderId}%22%7D`
+		request.get({url:url,headers:{"Cookie":info.cookie,"referer":`https://h5.m.taobao.com/awp/mtb/oper.htm?operId=0&orderId=${info.mainOrderId}&spm=a2141.7631731.0.i1`}},(error, response, body)=>{
+			if(/SUCCESS::调用成功/.test(body)){
+				body = body.replace(/callback\(/,"");
+				body = body.replace(/\}\)/,"}");
+				cb(null,JSON.parse(body))
+				return
+			}
+			cb(response,null)
+			return 
 		})
 	}
 }

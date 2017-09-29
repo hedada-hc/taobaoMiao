@@ -4,6 +4,7 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 export default new Router({
+  mode: 'history',
   routes: [
     {
       path: '/',
@@ -14,6 +15,13 @@ export default new Router({
       path:"/order",
       name:"order",
       component: require("@/components/Taobao/order/allOrder"),
+      children: [
+        {
+          path: '/order/hezone',
+          name: 'hezone-page',
+          component: require('@/components/hezone')
+        }
+      ]
     },
     {
       path:"/order/waitpay",
@@ -47,7 +55,7 @@ export default new Router({
     },
     {
       path: '*',
-      redirect: '/'
+      redirect: '/userlist'
     }
   ]
 })

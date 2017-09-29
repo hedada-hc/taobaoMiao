@@ -4,15 +4,15 @@
   	<div class="border"  style="-webkit-app-region: drag;">淘宝秒杀下单系统</div>
   	<div class="nav">
   		<ul>
-  			<li><a href="/#">下单任务列表</a></li>
+  			<li> <router-link to="/">下单任务列表</router-link></li>
   			<li>
-  				<a href="/#order">订单列表</a>
-  				<a href="/#order/waitpay">待付款</a>
-  				<a href="/#order/waitsend">待发货</a>
-  				<a href="/#order/waitconfirm">待收货</a>
+  				<router-link to="/order">订单列表</router-link>
+  				<router-link to="/order/waitpay">待付款</router-link>
+  				<router-link to="/order/waitsend">待发货</router-link>
+  				<router-link to="/order/waitconfirm">待收货</router-link>
   			</li>
-  			<li><a href="/#userlist">账号列表</a></li>
-  			<!-- <li><a href="/#config">软件配置</a></li> -->
+  			<li><router-link to="/userlist">账号列表</router-link></li>
+  			<!-- <li><a href="/#hezone">软件配置</a></li> -->
   		</ul>
 
   	</div>

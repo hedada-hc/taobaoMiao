@@ -1,22 +1,36 @@
 <template>
-	<table>
-		<tr class="header">
-			<th style="width:80px">账号名称</th>
-			<th style="width:80px">商品图片</th>
-			<th style="width:500px">商品标题</th>
-			<th style="width:80px">商品价格</th>
-			<th style="width:120px">店铺名称</th>
-			<th style="width:120px">交易状态</th>
-		</tr>
-		<tr class="order" v-for="item in OrderList">
-			<td>{{allCookies.nick}}</td>
-			<td><img :src="item.pic" width="30" height="30"></td>
-			<td>{{item.title}}</td>
-			<td>{{item.price}}</td>
-			<td>{{item.sellerNick}}</td>
-			<td>{{item.order_status}}</td>
-		</tr>
-	</table>	
+	<div class="allorder">
+		<div :style="isWuliu ? 'display:block' : 'display:none'" class="mask">
+			<dd @click="close">X</dd>
+			<ul>
+				<li v-for="item in bagList.transitList">
+				    <span>{{item.time}}</span>
+				    <p>{{item.message}}</p>
+				</li>
+			</ul>
+		</div>
+		<table>
+			<tr class="header">
+				<th style="width:80px">账号名称</th>
+				<th style="width:80px">商品图片</th>
+				<th style="width:300px">商品标题</th>
+				<th style="width:80px">商品价格</th>
+				<th style="width:120px">店铺名称</th>
+				<th style="width:200px">交易状态</th>
+			</tr>
+			<tr class="order" v-for="item in OrderList">
+				<td>{{allCookies.nick}}</td>
+				<td><img :src="item.pic" width="30" height="30"></td>
+				<td>{{item.title}}</td>
+				<td>{{item.price}}</td>
+				<td>{{item.sellerNick}}</td>
+				<td>
+					<a href="javascript:;" @click="queryLogistic(item)">查询物流</a>
+					<span>{{item.order_status}}</span>
+				</td>
+			</tr>
+		</table>	
+	</div>
 </template>
 
 <script type="text/javascript">
@@ -27,7 +41,10 @@
 				allCookies:[],
 				OrderList:null,
 				todo:false,
-				cookie:""
+				cookie:"",
+				isWuliu:false,
+				mailNo:0,
+				bagList:[]
 			}
 		},
 		created(){
@@ -66,12 +83,35 @@
 							this.OrderList = this.hezone.queryBoughtList(this.OrderList.data.data.group)
 							console.log(this.OrderList,JSON.parse(body))
 						}else{
+							this.OrderList = []
 							alert("session失效")
 						}
 						
 					}
 					
 				})
+			},
+			queryLogistic(item){
+				//获取物流信息
+				item.cookie = this.cookie
+				this.isWuliu = true
+				this.good.getLogisticByOrderId(item, (error, response)=>{
+					if(!error){
+						this.mailNo = response.data.orderList[0].bagList[0].mailNo
+						this.bagList = response.data.orderList[0].bagList[0]
+						console.log(this.mailNo,this.bagList)
+						/**
+						action:"GOT"
+						message:"顺丰速运 已收取快件"
+						time:"2017-09-28 00:00"
+						*/
+					}else{
+						console.log(error,response)
+					}
+				})
+			},
+			close(){
+				this.isWuliu = false;
 			}
 		}
 	}
@@ -90,6 +130,62 @@
 	// 	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);  
 	// 	background-color: #555;  
 	// } 
+.allorder{
+	width:100%;
+	height:100%;
+	.mask{
+		// 弹窗物流信息遮罩
+		width: 100%;
+		height: 100%;
+		background: rgba(0,0,0,0.7);
+		position: absolute;
+		dd{
+			display: block;
+			width: 20px;
+			height: 20px;
+			font-family: sans-serif;
+			color: #ffffff;
+			text-align: center;
+			line-height: 20px;
+			font-size: 11px;
+			cursor: pointer;
+			position: absolute;
+			background:#ff4f3d;
+		    left: 830px;
+		    top: 10px;
+		}
+		dd:hover{
+			background:#ff4f3d;
+			color: #ffffff;
+		}
+		ul{
+			width: 500px;
+			background: #eeeeee;
+			margin: 10px auto;
+			padding: 8px;
+			li{
+				list-style: none;
+				
+				width: 484px;
+				margin: 0 auto;
+				font-size: 13px;
+				text-align: center;
+				margin-bottom: 8px;
+				box-shadow: 0px 3px 7px #e4e4e4;
+				p{
+					color: #ff6537;
+					padding: 5px;
+					background: #ffffff;
+				}
+				span{
+					display: block;
+					padding: 3px;
+					color: #9a9999;
+					font-size: 12px;
+				}
+			}
+		}
+	}
 	table{
 		margin-top:82px;
 		padding: 0px;
@@ -131,5 +227,6 @@
 			}
 		}
 	}
+}
 </style>
 
