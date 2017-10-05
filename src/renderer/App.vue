@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-  	<a href="javascript:;" class="close" @click="close()">X</a>
-  	<div class="border"  style="-webkit-app-region: drag;">兄弟辅助</div>
+  	<!-- <a href="javascript:;" class="close" @click="close()">X</a>
+  	<div class="border"  style="-webkit-app-region: drag;">兄弟辅助</div> -->
   	<div class="nav">
   		<ul>
   			<li> <router-link to="/">下单任务列表</router-link></li>
@@ -12,9 +12,9 @@
   				<router-link to="/order/waitconfirm">待收货</router-link>
   			</li>
   			<li><router-link to="/userlist">账号列表</router-link></li>
+  			<li><router-link to="/login">登录账号</router-link></li>
   			<!-- <li><a href="/#hezone">软件配置</a></li> -->
   		</ul>
-
   	</div>
     <router-view></router-view>
   </div>
@@ -79,8 +79,8 @@
 		}
 		.nav{
 			position: fixed;
-			top: 30px;
-			height: 52px;
+			top: 0px;
+			height: 38px;
 			width: 100%;
 			background: #ffffff;
 			box-shadow: 0px 0px 8px #e4e4e4;
@@ -90,16 +90,15 @@
 					list-style: none;
 					float: left;
 					padding:0 10px;
-					height: 52px;
+					height: 38px;
 					margin: 0px 10px;
 					a{
-						height: 52px;
+						height: 38px;
 						display: block;
 						text-decoration: none;
 						color: #f40;
 						font-weight: 700;
-						padding: 0 5px;
-						line-height: 52px;
+						line-height: 38px;
 					}
 
 				}

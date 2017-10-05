@@ -13,7 +13,7 @@ const session = require("electron").session;
 let mainWindow
 let tbWindow
 const winURL = process.env.NODE_ENV === 'development'
-  ? `http://localhost:9080`
+  ? `http://localhost:3000`
   : `file://${__dirname}/index.html`
 
 function createWindow () {
@@ -21,12 +21,12 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 600,
+    height: 410,
     useContentSize: true,
-    width: 1200,
+    width: 480,
     center:true,
-    resizable:false,
-    frame:false,
+    // resizable:false,
+    // frame:false,
     hasShadow:true
   })
 

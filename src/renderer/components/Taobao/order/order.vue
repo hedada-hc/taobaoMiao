@@ -194,10 +194,10 @@
 		-webkit-appearance: none !important;
 	}
 	.order{
-		width: 1000px;
-		margin:100px auto;
+		width: 480px;
+		margin:48px auto;
 		.add_order{
-			width: 960px;
+			width: 470px;
 			margin: 0 auto;
 			background: #ffffff;
 			margin-bottom: 16px;
@@ -279,7 +279,7 @@
 				margin-right: 20px;
 				list-style-type: none;
 				background: #ffffff;
-				width: 490px;
+				width: 470px;
 				height: 75px;
 				box-shadow: 0px 0px 14px #d2d2d2;
 				dd{

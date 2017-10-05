@@ -4,7 +4,6 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 export default new Router({
-  mode: 'history',
   routes: [
     {
       path: '/',
@@ -52,6 +51,11 @@ export default new Router({
       path:"/config",
       name:"config",
       component: require("@/components/Taobao/config")
+    },
+    {
+      path:"/login",
+      name:"login_page",
+      component: require('@/components/Taobao/Login')
     },
     {
       path: '*',

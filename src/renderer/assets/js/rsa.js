@@ -622,8 +622,11 @@ RSAKey.prototype.encrypt = RSAEncrypt;
 var b64map = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
   , b64padchar = "=";
 
-function passwordRSAs(password,J_Module,J_Exponent){
-    var RAS = new RSAKey()
-    RAS.setPublic(J_Exponent,J_Module)
-    return RAS.encrypt(password)
+export default{
+    passwordRSAs(password,J_Module,J_Exponent){
+        var RAS = new RSAKey()
+        RAS.setPublic(J_Exponent,J_Module)
+        return RAS.encrypt(password)
+    }
 }
+
