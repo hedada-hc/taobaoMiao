@@ -2,7 +2,7 @@
 
 > 淘宝秒杀/淘宝下单
 # 项目运行GIF
-![](https://avatars0.githubusercontent.com/u/20290639?s=40&v=4)
+![](https://github.com/hedada-hc/taobaoMiao/goods.gif)
 #### Build Setup
 
 ``` bash
