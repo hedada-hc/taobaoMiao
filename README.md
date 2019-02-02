@@ -1,5 +1,5 @@
 # taobao
-BY: Hezone  QQ:183844707 Wechat: HeDaDa-Alone
+不再更新 可能19年会更新
 有问题联系我吧
 > 淘宝秒杀/淘宝下单
 # 项目运行GIF
